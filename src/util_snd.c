@@ -56,7 +56,7 @@ static int fade_time;
 static int fade_rate;
 static int master_vol;
 
-static unsigned char sound_use = FALSE;
+static unsigned char sound_use = 0;
 static Mix_Chunk *chunk[SOUND_CHUNKBANK];
 static int chunkChannel[SOUND_MIXBANK];
 static Mix_Music *music[SOUND_MUSBANK];
@@ -93,9 +93,9 @@ void soundInitBuffer(void)
 	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) < 0){
 		printf("Mix_Init: Failed to init required ogg and mod support!\n");
 		printf("Mix_Init: %s\n", Mix_GetError());
-		sound_use = FALSE;
+		sound_use = 0;
 	}else{
-		sound_use = TRUE;
+		sound_use = 1;
 	}
 	Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
 
@@ -176,7 +176,7 @@ void soundLoadBufferSE(Sint32 num, Uint8 *fname)
 	chunk[num] = Mix_LoadWAV((char *)fname);
 	if(!chunk[num]){
 		printf("Can't load sound %s\n", fname);
-		sound_use = FALSE;
+		sound_use = 0;
 	}
 #endif
 }

@@ -31,33 +31,9 @@ enum
 	REP_MAX = 30
 };
 
-#ifndef NULL
-#define NULL 0
-#endif
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef NONE
-#define NONE 0
-#endif
-
 #ifndef ABS
 #define ABS(a) ((a) < 0 ? -(a) : (a))
 #endif
-
-typedef union REG32{
-	struct{
-		Uint16 low;
-		Uint16 high;
-	}half;
-	Uint32 full;
-}REG32;
 
 #include <stdio.h>
 #include <stdlib.h>
