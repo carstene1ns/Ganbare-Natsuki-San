@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <SDL.h>
 #include "define.h"
 #include "extern.h"
@@ -12,14 +11,10 @@
 #include "ending.h"
 #include "logo.h"
 
-void scenemanager( void );
-
-void scenemanager( void )
+void scenemanager()
 {
-	int exit;
-	
-	exit = true;
-	while( exit )
+	bool exit = false;
+	while( !exit )
 	{
 		switch( g_scene )
 		{
@@ -39,11 +34,8 @@ void scenemanager( void )
 			logo_main( );
 			break;
 		default:
-			exit = false;
+			exit = true;
 			break;
 		}
 	}
-
 }
-
-

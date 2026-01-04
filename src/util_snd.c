@@ -6,42 +6,9 @@
 #include "util_snd.h"
 #include "define.h"
 
-#ifdef DREAMCAST
-#include <kos.h>
-#endif
-
-#ifdef GP2X
-enum{
-	SND_RATE = 44100, 
-	SND_CHANNEL = 2, 
-	SND_BUFFER = 128
-};
-#else
-enum{
-	SND_RATE = 44100, 
-	SND_CHANNEL = 2, 
-	SND_BUFFER = 1024
-};
-#endif
-
-void soundInitBuffer(void);
-void soundRelease(void);
-void soundLoadBuffer(Sint32 num, Uint8 *fname, int loop);
-void soundLoadBuffer2(Sint32 num, Uint8 *fname1, Uint8 *fname2);
-void soundLoadBufferSE(Sint32 num, Uint8 *fname);
-void soundStopBgm(Sint32 num);
-void soundStopBgmPlaying(void);
-int soundIsPlayBgm(void);
-void soundPlayBgm(Sint32 num);
-void soundPlayFadeFlag(Sint32 flag, Sint32 time);
-void soundPlayCtrl(void);
-void soundSetVolumeMaster(Sint32 vol);
-void soundSetVolumeBgm(Sint32 vol, Sint32 num);
-void soundSetVolumeAll(Sint32 vol);
-void soundStopSe(Sint32 num);
-void soundPlaySe(Sint32 num);
-int soundIsPlaySe(Sint32 num);
-void soundStopSeAll(void);
+#define SND_RATE 44100
+#define SND_CHANNEL 2
+#define SND_BUFFER 1024
 
 #ifdef NOSOUND
 	static int master_vol;
@@ -56,7 +23,7 @@ static int fade_time;
 static int fade_rate;
 static int master_vol;
 
-static unsigned char sound_use = 0;
+static bool sound_use = false;
 static Mix_Chunk *chunk[SOUND_CHUNKBANK];
 static int chunkChannel[SOUND_MIXBANK];
 static Mix_Music *music[SOUND_MUSBANK];
@@ -68,7 +35,7 @@ static int musicIsLoop;
 
 #endif
 
-void soundInitBuffer(void)
+void soundInitBuffer()
 {
 #ifndef NOSOUND
 	int i;
@@ -82,22 +49,40 @@ void soundInitBuffer(void)
 	play_sevol = MIX_MAX_VOLUME;
 	soundSetVolumeAll(play_bgmvol);
 
-	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0){
+	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
+	{
+		printf("Failed to init audio!\n");
+		sound_use = false;
 		return;
-    }
+	}
+
+	int res = 0;
+#ifdef MIDI_MUSIC
+	res = Mix_Init(MIX_INIT_MID) == MIX_INIT_MID;
+#else
+	res = Mix_Init(MIX_INIT_OGG) == MIX_INIT_OGG;
+#endif
+	if (!res)
+	{
+		printf("Mix_Init: Failed to init required ogg/mid support!\n");
+		printf("Mix_Init: %s\n", Mix_GetError());
+		sound_use = false;
+		return;
+	}
 
 	audio_rate = SND_RATE;
-	audio_format = AUDIO_S16;
+	audio_format = AUDIO_S16SYS;
 	audio_channels = SND_CHANNEL;
 	audio_buffers = SND_BUFFER;
 	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) < 0){
-		printf("Mix_Init: Failed to init required ogg and mod support!\n");
-		printf("Mix_Init: %s\n", Mix_GetError());
-		sound_use = 0;
-	}else{
-		sound_use = 1;
+		printf("Mix_OpenAudio: Failed to open audio!\n");
+		printf("Mix_OpenAudio: %s\n", Mix_GetError());
+		sound_use = false;
+		return;
 	}
-	Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
+
+	sound_use = true;
+	//Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
 
 	fade_vol = 0;
 	fade_ctrl = 0;
@@ -121,7 +106,7 @@ void soundInitBuffer(void)
 #endif
 }
 
-void soundRelease(void)
+void soundRelease()
 {
 #ifndef NOSOUND
 	int i;
@@ -145,7 +130,7 @@ void soundRelease(void)
 void soundLoadBuffer(Sint32 num, Uint8 *fname, int loop)
 {
 #ifndef NOSOUND
-	if(!music[num]){
+	if(!music[num]) {
 		music[num] = Mix_LoadMUS((char *)fname);
 		if (!music[num])
 		{
@@ -157,26 +142,13 @@ void soundLoadBuffer(Sint32 num, Uint8 *fname, int loop)
 #endif
 }
 
-void soundLoadBuffer2(Sint32 num, Uint8 *fname1, Uint8 *fname2)
-{
-#ifndef NOSOUND
-	if(!music[num]){
-		music[num] = Mix_LoadMUS((char *)fname1);
-		musicIntor[num] = 1;
-	}
-	if(!music_loop[num]){
-		music_loop[num] = Mix_LoadMUS((char *)fname2);
-	}
-#endif
-}
-
 void soundLoadBufferSE(Sint32 num, Uint8 *fname)
 {
 #ifndef NOSOUND
 	chunk[num] = Mix_LoadWAV((char *)fname);
 	if(!chunk[num]){
 		printf("Can't load sound %s\n", fname);
-		sound_use = 0;
+		sound_use = false;
 	}
 #endif
 }
@@ -198,7 +170,7 @@ void soundStopBgm(Sint32 num)
 #endif
 }
 
-void soundStopBgmPlaying(void)
+void soundStopBgmPlaying()
 {
 #ifndef NOSOUND
 	if(!sound_use){
@@ -215,16 +187,16 @@ void soundStopBgmPlaying(void)
 #endif
 }
 
-int soundIsPlayBgm(void)
+bool soundIsPlayBgm()
 {
 #ifndef NOSOUND
 	if(!sound_use){
-		return 0;
+		return false;
 	}
 
-	if(Mix_PlayingMusic() == SDL_TRUE) return 1;
+	if(Mix_PlayingMusic() != 0) return true;
 #endif
-	return	0;
+	return false;
 }
 
 void soundPlayBgm(Sint32 num)
@@ -266,17 +238,6 @@ void soundPlayBgm2(Sint32 num)
 #endif
 }
 
-void soundLoadPlayBgm(Uint8 *fname, Sint32 loop)
-{
-//	soundStopBgmPlaying();
-//	if(music[BGM_TEST]){
-//		Mix_FreeMusic(music[BGM_TEST]);
-//		music[BGM_TEST] = NULL;
-//	}
-//	soundLoadBuffer(BGM_TEST, fname, -1);
-//	soundPlayBgm(BGM_TEST);
-}
-
 void soundPlayFadeFlag(Sint32 flag, Sint32 time)
 {
 #ifndef NOSOUND
@@ -285,7 +246,7 @@ void soundPlayFadeFlag(Sint32 flag, Sint32 time)
 #endif
 }
 
-void soundPlayCtrl(void)
+void soundPlayCtrl()
 {
 #ifndef NOSOUND
 	int	i;
@@ -302,9 +263,9 @@ void soundPlayCtrl(void)
 
 	if(musicIsLoop){
 		if(musicIsLoop == 2){
-			if(Mix_PlayingMusic() == SDL_TRUE) musicIsLoop--;
+			if(Mix_PlayingMusic() == 1) musicIsLoop--;
 		}else{
-			if(Mix_PlayingMusic() == SDL_FALSE){
+			if(Mix_PlayingMusic() == 0){
 				musicIsLoop = 0;
 				soundPlayBgm2(musicPlayNum);
 			}
@@ -402,21 +363,21 @@ void soundPlaySe(Sint32 num)
 #endif
 }
 
-int soundIsPlaySe(Sint32 num)
+bool soundIsPlaySe(Sint32 num)
 {
 #ifndef NOSOUND
 	int	i;
 
 	for(i = 0; i < SOUND_MIXBANK; i++){
 		if(chunkChannel[i] == num){
-			if(Mix_Playing(i) != 0) return 1;
+			if(Mix_Playing(i) != 0) return true;
 		}
 	}
 #endif
-	return 0;
+	return false;
 }
 
-void soundStopSeAll(void)
+void soundStopSeAll()
 {
 #ifndef NOSOUND
 	int	i;

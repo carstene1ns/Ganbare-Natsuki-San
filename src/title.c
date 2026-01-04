@@ -1,31 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <SDL.h>
-#ifdef DREAMCAST
-#include "vmu.h"
-#endif
 #include "define.h"
 #include "function.h"
 #include "util_snd.h"
 #include "extern.h"
 #include "title.h" 
 
-#include "refresh.h"
-
-void title_main( void );
-void title_init( void );
-void title_relese( void );
-void title_keys( void );
-void title_drow( void );
-void title_init_save_data( void );
+// 関数プロトタイプ
+void title_init();
+void title_release();
+void title_keys();
+void title_draw();
+void title_init_save_data();
 void title_kane_set( int x, int y );
-void title_kane_disp( void );
+void title_kane_disp();
 void title_k_jmp( int i );
-int replay_file_find( void );
-int replay_file_find2( void );
+int replay_file_find();
+int replay_file_find2();
 
+// ＢＭＰ用定数
 enum
 {
 	EN_TITLE_NONE = 0,
@@ -37,81 +32,75 @@ enum
 	EN_TITLE_image6,
 };
 
-static int scene_exit;
+// 変数宣言
+static bool scene_exit;
 
-static int mode;	
+static int mode;	//現在選択されている項目	０：ＧＡＭＥＳＴＡＲＴ　１：ＯＰＴＩＯＮ　２：ＥＸＩＴ
 static int a[2] = {0,0};
 static int b[2] = {0,0};
-static int kane[200];	
+static int kane[200];	/* アイテム用バッファ */
 static int uracount = 0;
 
 static int title_no = 0;
-/* Size was 1024, reduce it to 29 as that's the minimum here. - Gameblabla */
-static char string[29];
+static char string[1024];
 
-void title_main( void )
+// メイン関数
+void title_main()
 {
-	int exit_code;
-
-	title_init( );		
+	title_init( );	// 初期化
 	
-	while( scene_exit )
+	while(! scene_exit )
 	{
-		title_keys( );		
-		title_drow( );
+		title_keys( );	// キー処理
+		title_draw( );	// 描画
 		
-		RefreshScreen( g_screen );
+		RefreshScreen();	// 描画
 		
-		
-		FPSWait( );	
-		exit_code = system_keys( ); 
-		if ( exit_code == 0 )
+		FPSWait( );	// 待ち
+		if ( system_keys( ) == 0 )
 		{
-			scene_exit = 0;
+			scene_exit = true;
 		}
 	}
 	
-	title_relese( );
+	title_release( );	// 終了
 }
 
-void title_init( void )
+void title_init()
 {
-#ifdef DREAMCAST
-	Stop_Music();
-#endif
-	scene_exit = 1;
+	scene_exit = false;
 
 	title_no = 0;
-	mode = 0;		
+	mode = 0;	//現在選択されている項目	０：ＧＡＭＥＳＴＡＲＴ　１：ＯＰＴＩＯＮ　２：ＥＸＩＴ
 	memset( kane, 0, sizeof( kane ) );
 	uracount = 0;
 	title_no = 0;
 
-	LoadBitmap(TITLE_IMAGE_PATH "title_natuki.bmp",1,true);
+	LoadBitmap(TITLE_IMAGE_PATH "title_natuki.bmp",1,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
 
 	if ( gameflag[100] == 1 )
 	{
-		LoadBitmap(TITLE_IMAGE_PATH "title2_2.bmp",2,true);
+		LoadBitmap(TITLE_IMAGE_PATH "title2_2.bmp",2,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
 	}
 	else 
 	{
-		LoadBitmap(TITLE_IMAGE_PATH "title2.bmp",2,true);
+		LoadBitmap(TITLE_IMAGE_PATH "title2.bmp",2,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
 	}
-	LoadBitmap(TITLE_IMAGE_PATH "scl.bmp",3,true);
-	LoadBitmap(BAK_IMAGE_PATH "1.bmp",5, false );
+	LoadBitmap(TITLE_IMAGE_PATH "scl.bmp",3,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
+	LoadBitmap(BAK_IMAGE_PATH "1.bmp",5, false );	//プレーンナンバー１にタイトル画面背景を読み込む
 
 	if ( gameflag[126] == 0 )
 	{
-		LoadBitmap(TITLE_IMAGE_PATH "title5.bmp",7,true);
+		LoadBitmap(TITLE_IMAGE_PATH "title5.bmp",7,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
 	}
 	else 
 	{
-		LoadBitmap(TITLE_IMAGE_PATH "title5_ura.bmp",7,true);
+		LoadBitmap(TITLE_IMAGE_PATH "title5_ura.bmp",7,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
 	}
 
-	LoadBitmap(TITLE_IMAGE_PATH "title3.bmp",10,true);
-	LoadBitmap(SYS_IMAGE_PATH "fonts2.bmp",18,true);
-	/*LoadBitmap(SYS_IMAGE_PATH "waku.bmp",109,true);*/
+	LoadBitmap(TITLE_IMAGE_PATH "title3.bmp",10,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
+	LoadBitmap(SYS_IMAGE_PATH "fonts2.bmp",18,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
+	/*LoadBitmap(SYS_IMAGE_PATH "waku.bmp",109,true);*/	//プレーンナンバー２にシステム用ＢＭＰを読み込む
 
 	a[0] = 100;
 	a[1] = 200;
@@ -119,33 +108,27 @@ void title_init( void )
 	
 	if ( gameflag[123] != -1 )
 	{
-		gameflag[120] = gameflag[123];
+		gameflag[120] = gameflag[123];	//リプレイ選択時のステージ
 	}
 	
 	if ( gameflag[120] > 50 )
 	{
 		gameflag[120] = 50;
 	}
-          
 	
 	soundPlayBgm( EN_BGM_GAME01 );
-
 }
 
-void title_relese( void )
+void title_release()
 {
-	int i;
-	
-	for ( i = 0; i < BMPBUFF_MAX; i++ )
-	{
+	for (int i = 0; i < BMPBUFF_MAX; i++)
 		ReleaseBitmap( i );
-	}
-	soundStopBgm(EN_BGM_GAME01);
 
+	soundStopBgm(EN_BGM_GAME01);
 }
 
 
-void title_keys( void )
+void title_keys()
 {
 	char path_item[96];
 	char path_work[96];
@@ -153,12 +136,6 @@ void title_keys( void )
 #ifdef MINGW
 	sprintf(path_work, "save/work.sav");
 	sprintf(path_item, "save/item_wk.sav");
-#elif defined(DREAMCAST)
-	sprintf(path_work, "/ram/work.sav");
-	sprintf(path_item, "/ram/item_wk.sav");
-#elif defined(_TINSPIRE)
-	sprintf(path_work, "./save/work.sav.tns");
-	sprintf(path_item, "./save/item_wk.sav.tns");
 #elif defined(RELATIVE_PATH)
 	sprintf(path_work, "work.sav");
 	sprintf(path_item, "item_wk.sav");
@@ -302,25 +279,22 @@ void title_keys( void )
 		b[0] = 0;
 	}
 
+	//	決定キーを押した
 	if ( IsPushOKKey( ) )
 	{
 		if ( mode == 4 )	/* Exit */
 		{
-			gameflag[123] = -1;
-			gameflag[40] = 10;
+			gameflag[123] = -1;	//リプレイ選択時のステージ
+			gameflag[40] = 10;	/* モードによって変える */
 			g_scene = EN_SN_EXIT;
-			scene_exit=0;
-			#ifdef DREAMCAST
-			DC_SaveVMU(path_work, "gan_work.sav", "WORK");
-			DC_SaveVMU(path_item, "gan_item.sav", "ITEM");
-			#endif
+			scene_exit = true;
 		}
 		else if ( mode == 3 )	/* option */
 		{
-			gameflag[123] = -1;
+			gameflag[123] = -1;	//リプレイ選択時のステージ
 			gameflag[40] = 3;
 			g_scene = EN_SN_OPTION;
-			scene_exit=0;
+			scene_exit = true;
 		}
 		else if ( mode == 2 )	/* demo */
 		{
@@ -329,22 +303,18 @@ void title_keys( void )
 			title_init_save_data( );
 			
 			gameflag[125] = 0;	/* replay nomal */
-			gameflag[123] = gameflag[120];
-			gameflag[132] =  1;		
-			gameflag2[3] = 1;
-			gameflag2[2] = 0;
+			gameflag[123] = gameflag[120];	//リプレイ選択時のステージ
+			gameflag[132] =  1;		//リプレイ
+			gameflag2[3] = 1;	/* 画面Ｎｏ */
+			gameflag2[2] = 0;	/* ステージ */
 			gameflag[70] = 1;
 			SaveGameFlag2(path_work);
 			ResetGameFlag2( );
 			SaveGameFlag2(path_item);
-			#ifdef DREAMCAST
-			DC_SaveVMU(path_work, "gan_work.sav", "WORK");
-			DC_SaveVMU(path_item, "gan_item.sav", "ITEM");
-			#endif
 
 			gameflag[40] = 4;
 			g_scene = EN_SN_ACT;
-			scene_exit=0;
+			scene_exit = true;
 		}
 		else if ( mode == 1 )	/* replay */
 		{
@@ -354,22 +324,18 @@ void title_keys( void )
 				
 				title_init_save_data( );
 				
-				gameflag[127] = 0;
-				gameflag[125] = 0;
-				gameflag[123] = gameflag[120];
-				gameflag[132] =  1;	
+				gameflag[127] = 0;	//トータルアタック
+				gameflag[125] = 0;	/* replay nomal */
+				gameflag[123] = gameflag[120];	//リプレイ選択時のステージ
+				gameflag[132] =  1;		//リプレイ
 				gameflag[70] = 1;
 				SaveGameFlag2(path_work);
 				ResetGameFlag2( );
 				SaveGameFlag2(path_item);
-				#ifdef DREAMCAST
-				DC_SaveVMU(path_work, "gan_work.sav", "WORK");
-				DC_SaveVMU(path_item, "gan_item.sav", "ITEM");
-				#endif
 
 				gameflag[40] = 4;
 				g_scene = EN_SN_ACT;
-				scene_exit=0;
+				scene_exit = true;
 				return;
 			}
 			else 
@@ -383,21 +349,17 @@ void title_keys( void )
 			
 			title_init_save_data( );
 			
-			gameflag[127] = 0;
-			gameflag[123] = -1;	
-			gameflag[132] =  0;
+			gameflag[127] = 0;	//トータルアタック
+			gameflag[123] = -1;	//リプレイ選択時のステージ
+			gameflag[132] =  0;	//リプレイ
 			gameflag[70] = 1;
 			SaveGameFlag2(path_work);
 			ResetGameFlag2( );
 			SaveGameFlag2(path_item);
-			#ifdef DREAMCAST
-			DC_SaveVMU(path_work, "gan_work.sav", "WORK");
-			DC_SaveVMU(path_item, "gan_item.sav", "ITEM");
-			#endif
 
 			gameflag[40] = 4;
 			g_scene = EN_SN_ACT;
-			scene_exit=0;
+			scene_exit = true;
 			return;
 		}
 		else if ( mode == -1 )
@@ -406,32 +368,29 @@ void title_keys( void )
 			
 			title_init_save_data( );
 			
-			gameflag[135] = 1000000;
-			gameflag[136] = 0;			
-			gameflag2[2] = 1;	
-			gameflag2[3] = 1;	
-			gameflag[123] = gameflag[120];	
-			gameflag[127] = 1;	
-			gameflag[123] = -1;	
-			gameflag[132] =  0;
+			gameflag[135] = 1000000;	/* タイム */
+			gameflag[136] = 0;	/* ミスカウント */
+			gameflag2[2] = 1;	/* ステージ */
+			gameflag2[3] = 1;	/* 画面Ｎｏ */
+			gameflag[123] = gameflag[120];	//リプレイ選択時のステージ
+			gameflag[127] = 1;	//トータルアタック
+			gameflag[123] = -1;	//リプレイ選択時のステージ
+			gameflag[132] =  0;	//リプレイ
 			gameflag[70] = 1;
 			SaveGameFlag2(path_work);
 			ResetGameFlag2( );
 			SaveGameFlag2(path_item);
-			#ifdef DREAMCAST
-			DC_SaveVMU(path_work, "gan_work.sav", "WORK");
-			DC_SaveVMU(path_item, "gan_item.sav", "ITEM");
-			#endif
 
 			gameflag[40] = 4;
 			g_scene = EN_SN_ACT;
-			scene_exit=0;
+			scene_exit = true;
 		}
 	}
 
+	//	キャンセルキーを押した
 	if ( IsPushCancelKey( ) )
 	{
-		if ( mode == 0 )
+		if ( mode == 0 )	/* 裏面 */
 		{
 			if ( gameflag[100] == 1 )
 			{
@@ -441,12 +400,12 @@ void title_keys( void )
 					if ( gameflag[126] == 0 )
 					{
 						gameflag[126] = 1;
-						LoadBitmap(TITLE_IMAGE_PATH "title5_ura.bmp",7,true);
+						LoadBitmap(TITLE_IMAGE_PATH "title5_ura.bmp",7,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
 					}
 					else 
 					{
 						gameflag[126] = 0;
-						LoadBitmap(TITLE_IMAGE_PATH "title5.bmp",7,true);				
+						LoadBitmap(TITLE_IMAGE_PATH "title5.bmp",7,true);	//プレーンナンバー２にシステム用ＢＭＰを読み込む
 					}
 					uracount = 0;
 				}
@@ -460,22 +419,18 @@ void title_keys( void )
 				
 				title_init_save_data( );
 				
-				gameflag[127] = 0;	
-				gameflag[125] = 1;	
-				gameflag[123] = gameflag[120];	
-				gameflag[132] =  1;	
+				gameflag[127] = 0;	//トータルアタック
+				gameflag[125] = 1;	/* replay jamp */
+				gameflag[123] = gameflag[120];	//リプレイ選択時のステージ
+				gameflag[132] =  1;		//リプレイ
 				gameflag[70] = 1;
 				SaveGameFlag2(path_work);
 				ResetGameFlag2( );
 				SaveGameFlag2(path_item);
-				#ifdef DREAMCAST
-				DC_SaveVMU(path_work, "gan_work.sav", "WORK");
-				DC_SaveVMU(path_item, "gan_item.sav", "ITEM");
-				#endif
 
 				gameflag[40] = 4;
 				g_scene = EN_SN_ACT;
-				scene_exit=0;
+				scene_exit = true;
 			}
 			else 
 			{
@@ -483,6 +438,8 @@ void title_keys( void )
 			}
 		}
 	}
+
+	/* 12ボタン　か　Ｃが押された */
 	if ( IsPushKey( gameflag[6] ) )
 	{
 		gameflag[122]++;
@@ -504,8 +461,9 @@ void title_keys( void )
 
 }
 
-void title_drow( void )
+void title_draw()
 {
+	//変数宣言
 	int stage_hosei;
 	int wk;
 	
@@ -515,8 +473,10 @@ void title_drow( void )
 		stage_hosei = 50;
 	}
 
-	ClearSecondary();
-	
+	//背景クリア
+	ClearScreen();
+
+	//タイトル画面の転送
 	if ( title_no == 0 )
 	{
 		Blt( 5, 0, 0 );
@@ -537,9 +497,9 @@ void title_drow( void )
 		Blt( 2, 0, 0 );
 		title_kane_disp(  );
 		
-		BltRect( 3, 96, 128 + ( mode * 16 ), 0, gameflag[122] * 32 , 32 , 32 );
-		BltNumericImage2( gameflag[120], 2, 262, 148, 18, 0, 0, 10, 8 );
-		BltRect( 18, 262, 164, 0, 56 + ( gameflag[124] * 8 ), 100, 8 );
+		BltRect( 3, 96, 128 + ( mode * 16 ), 0, gameflag[122] * 32 , 32 , 32 );	/* カーソル */
+		BltNumericImage2( gameflag[120], 2, 262, 148, 18, 0, 0, 10, 8 );	/* ステージ */
+		BltRect( 18, 262, 164, 0, 56 + ( gameflag[124] * 8 ), 100, 8 );	/* リプレイタイプ */
 		
 		BltRect( 18, 5, 230 , 0, 24, 100, 8 );	/*  */
 		BltRect( 18, 50, 230 , 0, 8, 100, 8 );	/*  */
@@ -552,66 +512,84 @@ void title_drow( void )
 		BltNumericImage( wk, 2, 50, 230, 18, 0, 0, 10, 8 );	/*  */
 			
 		BltRect( 18, 150, 230, 0, 80, 100, 8 );	/*  */
-		BltNumericImage2( gameflag[300 + gameflag[120] + stage_hosei], 3, 185, 230, 18, 0, 0, 10, 8 );
+		BltNumericImage2( gameflag[300 + gameflag[120] + stage_hosei], 3, 185, 230, 18, 0, 0, 10, 8 );	/* Jump_counts */
 	}
 
+	// FIXME: present in 1.04
 	/*if ( gameflag[61] == 0 )
 	{
 		Blt( 109 , -160, -120 );
 	}*/
 	
+	//キー入力検査
 	KeyInput();				
 
 }
 
 
-void title_init_save_data( void )
-{
-	gameflag2[0]	= 8 * 32;	
-	gameflag2[1]	= ( 2 * 32 ) - 16;	
-	if ( gameflag[126] == 1 )
-	{
-		gameflag2[2]	= 2;
-	}
-	else 
-	{
-		gameflag2[2]	= 1;
-	}
-	gameflag2[3]	= gameflag[120];
-	gameflag2[4]	= 0;	/* ���� */
-	gameflag2[5]	= 3;	/* ���݂g�o */
-	gameflag2[6]	= 3;	/* �ő�g�o */
-	gameflag2[7]	= 0;	/* �n�[�g�̂����珊���� */
-	gameflag2[8]	= 0;	/* ���ݐݒ�X�L�� */
-	gameflag2[9]	= 0;	/* �e���|�[�^�g�p�s�A�X�N���[���s�t���O */
-	gameflag2[10]	= 0;	/* �e���|�[�^�g�p�s�t���O */
-
-	gameflag2[20]	= 0; 	/* �� */
-	gameflag2[21]	= 0; 	/* �� */
-	gameflag2[22]	= 0; 	/* �b */
-	
-	gameflag2[30]	= 0;	/* �e���|�[�^�[�g�p */
-	gameflag2[31]	= 0;	/* �e���|�[�^�[�X�e�[�W */
-	gameflag2[32]	= 0;	/* �e���|�[�^�[��ʂm�� */
-	gameflag2[33]	= 0;	/* �e���|�[�^�[�w */
-	gameflag2[34]	= 0;	/* �e���|�[�^�[�x */
-
-	gameflag2[40]	= 0;	/* �擾�X�L���P */
-	gameflag2[41]	= 0;	/* �擾�X�L���Q */
-	gameflag2[42]	= 0;	/* �擾�X�L���R */
-	gameflag2[43]	= 0;	/* �擾�X�L���S */
-}
-
 /***************************************************************************/
-// NAME      = kane_set
-// FUNCTION  = �^�C�g�������̐���
+// NAME      = init_save_data
+// FUNCTION  = セーブファイルの初期値を設定
 // NOTES     = 
 // DATE      = 
 // AUTHER    = koizumi
 // HISTORY   =
-// PARAMETER = x�F�����ʒu
-//             y�F�����ʒu
-// RETURN    = �Ȃ�
+// PARAMETER = なし
+// RETURN    = なし
+/***************************************************************************/
+void title_init_save_data( void )
+{
+	gameflag2[0]	= 8 * 32;	/* Ｘ */
+	gameflag2[1]	= ( 2 * 32 ) - 16;	/* Ｙ */
+	if ( gameflag[126] == 1 )
+	{
+		gameflag2[2]	= 2;	/* ステージ */
+	}
+	else 
+	{
+		gameflag2[2]	= 1;	/* ステージ */
+	}
+	gameflag2[3]	= gameflag[120];	/* 画面Ｎｏ */
+	gameflag2[4]	= 0;	/* 向き */
+	gameflag2[5]	= 3;	/* 現在ＨＰ */
+	gameflag2[6]	= 3;	/* 最大ＨＰ */
+	gameflag2[7]	= 0;	/* ハートのかけら所持個数 */
+	gameflag2[8]	= 0;	/* 現在設定スキル */
+	gameflag2[9]	= 0;	/* テレポータ使用不可、スクロール不可フラグ */
+	gameflag2[10]	= 0;	/* テレポータ使用不可フラグ */
+
+	gameflag2[20]	= 0; 	/* 時 */
+	gameflag2[21]	= 0; 	/* 分 */
+	gameflag2[22]	= 0; 	/* 秒 */
+	
+	gameflag2[30]	= 0;	/* テレポーター使用 */
+	gameflag2[31]	= 0;	/* テレポーターステージ */
+	gameflag2[32]	= 0;	/* テレポーター画面Ｎｏ */
+	gameflag2[33]	= 0;	/* テレポーターＸ */
+	gameflag2[34]	= 0;	/* テレポーターＹ */
+
+	gameflag2[40]	= 0;	/* 取得スキル１ */
+	gameflag2[41]	= 0;	/* 取得スキル２ */
+	gameflag2[42]	= 0;	/* 取得スキル３ */
+	gameflag2[43]	= 0;	/* 取得スキル４ */
+
+	
+	/* イニシャライズが必要な場合はここに記述する */
+//	gameflag2[100]	= ;	/* イベントフラグ[100]〜[199] */
+
+	/* 100〜399イベント用フラグ */
+}
+
+/***************************************************************************/
+// NAME      = kane_set
+// FUNCTION  = タイトル文字の生成
+// NOTES     = 
+// DATE      = 
+// AUTHER    = koizumi
+// HISTORY   =
+// PARAMETER = x：初期位置
+//             y：初期位置
+// RETURN    = なし
 /***************************************************************************/
 void title_kane_set( int x, int y )
 {
@@ -639,13 +617,13 @@ void title_kane_set( int x, int y )
 
 /***************************************************************************/
 // NAME      = kane_disp
-// FUNCTION  = �^�C�g�������̕\��
+// FUNCTION  = タイトル文字の表示
 // NOTES     = 
 // DATE      = 
 // AUTHER    = koizumi
 // HISTORY   =
-// PARAMETER = �Ȃ�
-// RETURN    = �Ȃ�
+// PARAMETER = なし
+// RETURN    = なし
 /***************************************************************************/
 void title_kane_disp( void )
 {
@@ -665,13 +643,13 @@ void title_kane_disp( void )
 
 /***************************************************************************/
 // NAME      = k_jmp
-// FUNCTION  = �^�C�g��������Y�\���ʒu�v�Z
+// FUNCTION  = タイトル文字のY表示位置計算
 // NOTES     = 
 // DATE      = 
 // AUTHER    = koizumi
 // HISTORY   =
-// PARAMETER = i�F�o�b�t�@�ԍ�
-// RETURN    = �Ȃ�
+// PARAMETER = i：バッファ番号
+// RETURN    = なし
 /***************************************************************************/
 void title_k_jmp( int i )
 {
@@ -706,10 +684,10 @@ void title_k_jmp( int i )
 		{
 			kane[6 + ( i * 10 )] = -8;
 		}
-		/* �n�ʔ��� */
+		/* 地面判定 */
 	}
 	
-	/* ����̈ʒu */
+	/* 今回の位置 */
 	y1 = ( ( 0 - kane[6 + ( i * 10 )] ) * ( 0 - kane[6 + ( i * 10 )] ) * ( 0 - kane[6 + ( i * 10 )] ) );
 	kane[2 + ( i * 10 )] = kane[2 + ( i * 10 )] - ( y1 / 25 );
 
@@ -723,13 +701,13 @@ void title_k_jmp( int i )
 
 /***************************************************************************/
 // NAME      = replay_file_find
-// FUNCTION  = ���v���C�t�@�C���̌���
+// FUNCTION  = リプレイファイルの検索
 // NOTES     = 
 // DATE      = 
 // AUTHER    = koizumi
 // HISTORY   =
-// PARAMETER = �Ȃ�
-// RETURN    = �t�@�C���̗L��
+// PARAMETER = なし
+// RETURN    = ファイルの有無
 /***************************************************************************/
 int replay_file_find( void )
 {
@@ -740,7 +718,7 @@ int replay_file_find( void )
 	stage = 1;
 	if ( gameflag[126] == 1 )
 	{
-		stage = 2;	/* ���X�e�[�W */
+		stage = 2;	/* 裏ステージ */
 	}
 	else 
 	{
@@ -760,13 +738,13 @@ int replay_file_find( void )
 
 /***************************************************************************/
 // NAME      = replay_file_find2
-// FUNCTION  = �ŒZ�W�����v���v���C�t�@�C���̌���
+// FUNCTION  = 最短ジャンプリプレイファイルの検索
 // NOTES     = 
 // DATE      = 
 // AUTHER    = koizumi
 // HISTORY   =
-// PARAMETER = �Ȃ�
-// RETURN    = �t�@�C���̗L��
+// PARAMETER = なし
+// RETURN    = ファイルの有無
 /***************************************************************************/
 int replay_file_find2( void )
 {
@@ -777,7 +755,7 @@ int replay_file_find2( void )
 	stage = 1;
 	if ( gameflag[126] == 1 )
 	{
-		stage = 2;	/* ���X�e�[�W */
+		stage = 2;	/* 裏ステージ */
 	}
 	else 
 	{
@@ -792,7 +770,3 @@ int replay_file_find2( void )
 	
 	return( file_j );
 } 
-
-
-
-

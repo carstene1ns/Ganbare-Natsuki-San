@@ -1,6 +1,6 @@
-#ifndef __TITLE
-#define __TITLE
+#ifndef TITLE_H
+#define TITLE_H
 
-extern void title_main( void );
+extern void title_main();
 
-#endif
+#endif // TITLE_H

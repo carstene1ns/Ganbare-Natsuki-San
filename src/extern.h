@@ -1,10 +1,9 @@
 #ifndef EXTERN_H
 #define EXTERN_H
 
-#include <stdint.h>
 #include "define.h"
 
-extern SDL_Surface *g_screen;
+extern SDL_Renderer *g_renderer;
 extern int g_scene;
 
 extern Sint32 gameflag[GAMEFLAG_SIZE];

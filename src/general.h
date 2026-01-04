@@ -1,5 +1,5 @@
-#ifndef	_GENERAL_
-#define _GENERAL_
+#ifndef GENERAL_H
+#define GENERAL_H
 
 #include <SDL.h>
 
@@ -38,11 +38,6 @@ enum
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#if !defined(PSPUMODE) 
-#if !defined(DREAMCAST)
 #include <memory.h>
-#endif
-#endif
 
-#endif /* _GENERAL_ */
+#endif // GENERAL_H

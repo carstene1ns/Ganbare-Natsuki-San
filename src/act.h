@@ -1,6 +1,6 @@
-#ifndef __ACT
-#define __ACT
+#ifndef ACT_H
+#define ACT_H
 
-extern void act_main( void );
+extern void act_main();
 
-#endif
+#endif // ACT_H

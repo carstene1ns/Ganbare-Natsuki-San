@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <SDL.h>
 #include "define.h"
 #include "function.h"
@@ -9,95 +8,89 @@
 #include "extern.h"
 #include "ending.h" 
 
-#include "refresh.h"
+// 関数プロトタイプ
+void ending_init();
+void ending_release();
+void ending_keys();
+void ending_draw();
+void ending_init_save_data();
 
-void ending_main( void );
-void ending_init( void );
-void ending_relese( void );
-void ending_keys( void );
-void ending_drow( void );
-void ending_init_save_data( void );
+// 変数宣言
+static bool scene_exit;
 
-
-static int scene_exit;
-
-void ending_main( void )
+// メイン関数
+void ending_main()
 {
-	int exit_code;
-
-	ending_init( );	
+	ending_init( );	// 初期化
 	
-	while( scene_exit )
+	while( !scene_exit )
 	{
-		ending_keys( );	
-		ending_drow( );
+		ending_keys( );	// キー処理
+		ending_draw( );	// 描画
 		
-		RefreshScreen( g_screen );
-		FPSWait( );	
+		RefreshScreen( );	// 描画
+		FPSWait( );	// 待ち
 
-		exit_code = system_keys( );
-		if ( exit_code == 0 )
+		if ( system_keys( ) == 0 )
 		{
-			scene_exit = 0;
+			scene_exit = true;
 		}
 	}
 	
-	ending_relese( );		// �I��
+	ending_release( );		// 終了
 }
 
-void ending_init( void )
+void ending_init()
 {
-	scene_exit = 1;
+	scene_exit = false;
 
-	LoadBitmap(BAK_IMAGE_PATH "1.bmp",1,false);
-	LoadBitmap(END_IMAGE_PATH "1.bmp",2,true);	
+	LoadBitmap(BAK_IMAGE_PATH "1.bmp",1,false);	//プレーンナンバー１にタイトル画面背景を読み込む
+	LoadBitmap(END_IMAGE_PATH "1.bmp",2,true);	//プレーンナンバー１にタイトル画面背景を読み込む
 	
 	if ( gameflag[126] == 0 )
 	{ 
-		LoadBitmap(END_IMAGE_PATH "2.bmp",3,true);
+		LoadBitmap(END_IMAGE_PATH "2.bmp",3,true);	//プレーンナンバー１にタイトル画面背景を読み込む
 	}
 	else 
 	{
-		LoadBitmap(END_IMAGE_PATH "3.bmp",3,true);
+		LoadBitmap(END_IMAGE_PATH "3.bmp",3,true);	//プレーンナンバー１にタイトル画面背景を読み込む
 	}
 
-	/*LoadBitmap(SYS_IMAGE_PATH "waku.bmp",109,true);*/
+	/*LoadBitmap(SYS_IMAGE_PATH "waku.bmp",109,true);*/	//プレーンナンバー２にシステム用ＢＭＰを読み込む
 	soundPlayBgm( EN_BGM_GAME02 );
 
 }
 
-void ending_relese( void )
+void ending_release()
 {
-	int i;
-	
-	for ( i = 0; i < BMPBUFF_MAX; i++ )
-	{
+	for (int i = 0; i < BMPBUFF_MAX; i++ )
 		ReleaseBitmap( i );
-	}
-	soundStopBgm(EN_BGM_GAME01);
 
+	soundStopBgm(EN_BGM_GAME01);
 }
 
 
-void ending_keys( void )
+void ending_keys()
 {
+	//	スペースキーが押される
 	if ( ( IsPushKey(gameflag[4]) ) || ( IsPushKey(gameflag[5]) ) )
 	{
-		gameflag[40] = 0;					/* �^�C�g�� */
+		gameflag[40] = 0;	/* タイトル */
 		g_scene = EN_SN_TITLE;
-		scene_exit=0;
+		scene_exit = true;
 		return;
 	}
 
 }
 
-void ending_drow( void )
+void ending_draw()
 {
+	ClearScreen();
+
 	Blt( 1 , 0, 0 );
 	Blt( 3 , 0, 0 );
 	Blt( 2 , 0, 0 );
 	
+	//キー入力検査
 	KeyInput();				
 }
-
-

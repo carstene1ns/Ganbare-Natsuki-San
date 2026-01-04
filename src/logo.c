@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <SDL.h>
 #include "define.h"
 #include "function.h"
@@ -9,84 +8,77 @@
 #include "extern.h"
 #include "logo.h" 
 
-#include "refresh.h"
+// 関数プロトタイプ
+void logo_init();
+void logo_release();
+void logo_keys();
+void logo_draw();
+void logo_init_save_data();
 
-void logo_main( void );
-void logo_init( void );
-void logo_relese( void );
-void logo_keys( void );
-void logo_drow( void );
-void logo_init_save_data( void );
-
-static int scene_exit;
+// 変数宣言
+static bool scene_exit;
 static int demo;
 
-
-void logo_main( void )
+// メイン関数
+void logo_main()
 {
-	int exit_code;
+	logo_init( );	// 初期化
 	
-	logo_init( );	
-	
-	while( scene_exit )
+	while( !scene_exit )
 	{
-		logo_keys( );	
-		logo_drow( );		
+		logo_keys( );	// キー処理
+		logo_draw( );	// 描画
 		
-		RefreshScreen( g_screen );
-		FPSWait( );	
+		RefreshScreen();	// 描画
+		FPSWait( );	// 待ち
 
-		exit_code = system_keys( ); 
-		if ( exit_code == 0 )
+		if ( system_keys( ) == 0 )
 		{
-			scene_exit = 0;
+			scene_exit = true;
 		}
 	}
 	
-	logo_relese( );	
+	logo_release( );	// 終了
 }
 
-void logo_init( void )
+void logo_init( )
 {
-	scene_exit = 1;
+	scene_exit = false;
 	demo = 0;
 	
-	LoadBitmap(IMAGE_PATH "a_logo.bmp",2,true);	
+	LoadBitmap(IMAGE_PATH "a_logo.bmp",2,true);	//プレーンナンバー１にタイトル画面背景を読み込む
 
 	soundStopBgm(EN_BGM_GAME01);
 }
 
-void logo_relese( void )
+void logo_release()
 {
-	int i;
-	
-	for ( i = 0; i < BMPBUFF_MAX; i++ )
-	{
+	for (int i = 0; i < BMPBUFF_MAX; i++ )
 		ReleaseBitmap( i );
-	}
+
 	soundStopBgm(EN_BGM_GAME01);
-
 }
-
 
 void logo_keys( void )
 {
+	//	スペースキーが押される
 	if ( ( IsPushKey(gameflag[4]) ) || ( IsPushKey(gameflag[5]) ) || ( demo > ( 60 * 3 ) ) )
 	{
-		gameflag[40] = 0;	
+		gameflag[40] = 0;	/* タイトル */
 		g_scene = EN_SN_TITLE;
-		scene_exit=0;
+		scene_exit = true;
 		return;
 	}
 }
 
-void logo_drow( void )
+void logo_draw( void )
 {
-	ClearSecondary();
+	//背景クリア
+	ClearScreen();
 	demo++;
-	
+
 	Blt( 2, 0, 0 );		/* 320 * 240 */
+
+	//キー入力検査
 	KeyInput();				
 }
-
-

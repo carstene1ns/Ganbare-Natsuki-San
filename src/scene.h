@@ -1,6 +1,6 @@
-#ifndef __SCENEMANAGER
-#define __SCENEMANAGER
+#ifndef SCENE_H
+#define SCENE_H
 
-extern void scenemanager( void );
+extern void scenemanager();
 
-#endif
+#endif // SCENE_H

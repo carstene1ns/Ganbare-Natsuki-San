@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <SDL.h>
 #include "define.h"
 #include "function.h"
@@ -9,19 +8,16 @@
 #include "extern.h"
 #include "option.h" 
 
-#include "refresh.h"
-
-void option_main( void );
-void option_init( void );
-void option_relese( void );
-void option_keys( void );
-void option_drow( void );
-void option_init_save_data( void );
+void option_init();
+void option_release();
+void option_keys();
+void option_draw();
+void option_init_save_data();
 void option_kane_set( int x, int y );
-void option_kane_disp( void );
+void option_kane_disp();
 void option_k_jmp( int i );
 
-static int scene_exit;
+static bool scene_exit;
 
 static int mode;	
 static int ag = 0;
@@ -33,39 +29,35 @@ static int b[2] = {0,0};
 static int tolal_time[5];
 static int tolal_time2[5];
 static int tolal_time3[5];
-/* Size was 1024, reduce it to 20 as that's the minimum here. - Gameblabla */
-static char string[20];
+static char string[1024];
 
-void option_main( void )
+void option_main()
 {
-	int exit_code;
-	
 	option_init( );		
 	
-	while( scene_exit )
+	while( !scene_exit )
 	{
 		option_keys( );		
-		option_drow( );		
+		option_draw( );		
 		
-		RefreshScreen( g_screen );	
+		RefreshScreen( );	
 		FPSWait( );		
 
-		exit_code = system_keys( ); 
-		if ( exit_code == 0 )
+		if ( system_keys( ) == 0 )
 		{
-			scene_exit = 0;
+			scene_exit = true;
 		}
 	}
 	
-	option_relese( );		
+	option_release( );		
 }
 
-void option_init( void )
+void option_init()
 {
 	int i;
 	int wk;
 	
-	scene_exit = 1;
+	scene_exit = false;
 
 	mode = 0;	
 	ag = 0;
@@ -186,20 +178,16 @@ void option_init( void )
 
 }
 
-void option_relese( void )
+void option_release()
 {
-	int i;
-	
-	for ( i = 0; i < BMPBUFF_MAX; i++ )
-	{
+	for (int i = 0; i < BMPBUFF_MAX; i++)
 		ReleaseBitmap( i );
-	}
-	soundStopBgm(EN_BGM_GAME01);
 
+	soundStopBgm(EN_BGM_GAME01);
 }
 
 
-void option_keys( void )
+void option_keys()
 {
 	if ( ag == 0 )
 	{
@@ -290,7 +278,7 @@ void option_keys( void )
 
 			gameflag[40] = 1;					
 			g_scene = EN_SN_TITLE;
-			scene_exit=0;
+			scene_exit = true;
 		}
 		else if ( mode == 4 )
 		{
@@ -298,7 +286,7 @@ void option_keys( void )
 			{
 				gameflag[40] = 5;						
 				g_scene = EN_SN_ENDING;
-				scene_exit=0;
+				scene_exit = true;
 			}
 			else 
 			{
@@ -348,29 +336,17 @@ void option_keys( void )
 
 }
 
-void option_drow( void )
+void option_draw()
 {
-	int i;
-	int x, y;
-
-	ClearSecondary();
+	ClearScreen();
 
 	a[0]++;
 	if ( a[0] > 100 )
-	{
 		a[0] = 0;
-	}
 	
-	/* For some obscure reasons, triggers a crash on Dreamcast */
-	#ifndef DREAMCAST
-	for ( x = 0; x < 5; x++ )
-	{
-		for ( y = 0; y < 4; y++ )
-		{
+	for (int x = 0; x < 5; x++)
+		for (int y = 0; y < 4; y++)
 			Blt( 5, ( x * 100 )- a[0], ( y * 100 ) - a[0] );
-		} 
-	}
-	#endif
 
 	Blt( 1, 10, 90 );
 	
@@ -379,10 +355,8 @@ void option_drow( void )
 		Blt( 7, 0, 0 );
 		BltRect( 3, 50, 58 + ( mode * 8 ) , 32 + ( a[1] * 5 ) , 0, 5, 7 );
 		
-		for ( i = 0; i < 3 ; i++ )
-		{
+		for (int i = 0; i < 3 ; i++ )
 			BltNumericImage( selct[i], 2, 200, 56 + ( i * 8 ), 6, 0, 0, 10, 8 );
-		}
 
 		BltNumericImage2( gameflag[110], 3, 180, 64 + ( 5 * 8 ), 6, 0, 0, 10, 8 );
 		BltNumericImage( gameflag[109], 2, 200 + 20 + 10, 64 + ( 5 * 8 ), 6, 0, 0, 10, 8 );
@@ -417,8 +391,5 @@ void option_drow( void )
 
 	}
 	
-
 	KeyInput();				
 }
-
-

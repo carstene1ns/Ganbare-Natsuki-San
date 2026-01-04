@@ -1,6 +1,6 @@
-#ifndef __ENDING
-#define __ENDING
+#ifndef ENDING_H
+#define ENDING_H
 
-extern void ending_main( void );
+extern void ending_main();
 
-#endif
+#endif // ENDING_H

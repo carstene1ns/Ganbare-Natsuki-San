@@ -10,13 +10,6 @@
 #include "dconv.h" 
 #include "general.h" 
 
-#include "refresh.h"
-
-#ifdef DREAMCAST
-#include "vmu.h"
-#endif
-
-void act_main( void );
 void act_init( void );
 void act_relese( void );
 void act_keys( void );
@@ -99,16 +92,15 @@ Sint32 replay_file_load( void );
 Sint32 GetKyori( Sint32 i1, Sint32 i2 );
 void debugdisp( void );
 
-/* Size was 1024, reduce it to 30 as that's the minimum required here. - Gameblabla */
-static char string[30];
+static char string[1024];
 
 static Sint32 scene_exit;
-static Sint32 sn = 0;									/* ê–Ê—p•Ï”‚±‚ê‚ğ•Ï‚¦‚é‚±‚Æ‚É‚æ‚Á‚Ä•`‰æŠÖ”“à‚Ìˆ—‚ğ•Ï‚¦‚é		*/
+static Sint32 sn = 0;	/* å ´é¢ç”¨å¤‰æ•°ã“ã‚Œã‚’å¤‰ãˆã‚‹ã“ã¨ã«ã‚ˆã£ã¦æç”»é–¢æ•°å†…ã®å‡¦ç†ã‚’å¤‰ãˆã‚‹		*/
 
 static Sint32 enm1_parameter[10 * 20] = 
 {
 /*   HP */
-	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 0–¢g—p */
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 0æœªä½¿ç”¨ */
 	  1,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 1 */
 	  1,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 2 */
 	  1,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 3 */
@@ -121,13 +113,13 @@ static Sint32 enm1_parameter[10 * 20] =
 	  1,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 10 */
 	  1,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 11 */
 	  1,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 12 */
-	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0 	/* 20–¢g—p */
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0 	/* 20æœªä½¿ç”¨ */
 };
 
 static Sint32 enm2_parameter[10 * 20] = 
 {
 /*   HP */
-	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 0–¢g—p */
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 0æœªä½¿ç”¨ */
 	  1,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 1 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 2 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 3 */
@@ -137,13 +129,13 @@ static Sint32 enm2_parameter[10 * 20] =
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 7 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 8 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 9 */
-	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0 	/* 20–¢g—p */
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0 	/* 20æœªä½¿ç”¨ */
 };
 
 static Sint32 enm3_parameter[10 * 20] = 
 {
-/*   HP   ‹à UŒ‚ ‘®« ‘Š« */
-	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 0–¢g—p */
+/*   HP   é‡‘ æ”»æ’ƒ å±æ€§ ç›¸æ€§ */
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 0æœªä½¿ç”¨ */
 	  1,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 1 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 2 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 3 */
@@ -153,14 +145,14 @@ static Sint32 enm3_parameter[10 * 20] =
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 7 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 8 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 9 */
-	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0 	/* 20–¢g—p */
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0 	/* 20æœªä½¿ç”¨ */
 };
 
 static Sint32 enm4_parameter[10 * 20] = 
 {
 /*   HP */
-	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 0–¢g—p */
-	  7,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 1ƒ{ƒX */
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 0æœªä½¿ç”¨ */
+	  7,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 1ãƒœã‚¹ */
 	  7,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 2 */
 	 30,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 3 */
 	 27,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 4 */
@@ -169,148 +161,148 @@ static Sint32 enm4_parameter[10 * 20] =
       1,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 7 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 8 */
 	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 	/* 9 */
-	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0 	/* 20–¢g—p */
+	  0,   0,   0,   0,   0,   0,   0,   0,   0,   0 	/* 20æœªä½¿ç”¨ */
 };
 
-static Sint32 item_data[3] = { 32, 500, 10 };			/* ƒAƒCƒeƒ€‚Ìî•ñ@ƒTƒCƒYAÅ‘å”z’uŒÂ”A1ƒf[ƒ^ƒoƒbƒtƒ@” */
-static Sint32 enm_data[3] = { 0, 500, 20 };			/* “G‚Ìî•ñ@—\”õAÅ‘å”z’uŒÂ”A1ƒf[ƒ^ƒoƒbƒtƒ@” */
+static Sint32 item_data[3] = { 32, 500, 10 };			/* ã‚¢ã‚¤ãƒ†ãƒ ã®æƒ…å ±ã€€ã‚µã‚¤ã‚ºã€æœ€å¤§é…ç½®å€‹æ•°ã€1ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡æ•° */
+static Sint32 enm_data[3] = { 0, 500, 20 };			/* æ•µã®æƒ…å ±ã€€äºˆå‚™ã€æœ€å¤§é…ç½®å€‹æ•°ã€1ãƒ‡ãƒ¼ã‚¿ãƒãƒƒãƒ•ã‚¡æ•° */
 static Sint32 MapInfo[10] = 
 {
-	20 * 1									/* 0:ƒ}ƒbƒv‚ÌxƒTƒCƒY */
-,	15 * 1									/* 1:ƒ}ƒbƒv‚ÌyƒTƒCƒY */
-,	( 20 * 1 ) * 32							/* 2:ƒ}ƒbƒv‚Ìx•\¦ƒTƒCƒY */
-,	( 15 * 1 ) * 32							/* 3:ƒ}ƒbƒv‚Ìy•\¦ƒTƒCƒY */
-,   20										/* 4:ƒwƒbƒ_ƒf[ƒ^•”‚Ìƒf[ƒ^” */
+	20 * 1									/* 0:ãƒãƒƒãƒ—ã®xã‚µã‚¤ã‚º */
+,	15 * 1									/* 1:ãƒãƒƒãƒ—ã®yã‚µã‚¤ã‚º */
+,	( 20 * 1 ) * 32							/* 2:ãƒãƒƒãƒ—ã®xè¡¨ç¤ºã‚µã‚¤ã‚º */
+,	( 15 * 1 ) * 32							/* 3:ãƒãƒƒãƒ—ã®yè¡¨ç¤ºã‚µã‚¤ã‚º */
+,   20										/* 4:ãƒ˜ãƒƒãƒ€ãƒ‡ãƒ¼ã‚¿éƒ¨ã®ãƒ‡ãƒ¼ã‚¿æ•° */
 };
 
-static Sint32 player[50];									/* ƒvƒŒƒCƒ„[—pƒoƒbƒtƒ@ */
+static Sint32 player[50];									/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ç”¨ãƒãƒƒãƒ•ã‚¡ */
 											/* player[0] X */
 											/* player[1] Y */
-											/* player[2] ó‘Ô */
-											/* player[3] Œü‚« */
-											/* player[4] BMP“à‚Ì•\¦ˆÊ’uX */
-											/* player[5] BMP“à‚Ì•\¦ˆÊ’uY */
-											/* player[6] ’Í‚İ’†‚ÌˆÚ“®•â³X */
-											/* player[7] ’Í‚İ’†‚ÌˆÚ“®•â³Y */
-											/* player[8] Œ»İHP */
-											/* player[9] “G‚ğ’Í‚ñ‚Å‚¢‚é */
-											/* player[10] ƒAƒjƒ[ƒVƒ‡ƒ“ƒtƒŒ[ƒ€ƒJƒEƒ“ƒ^ */
-											/* player[11] ƒAƒjƒ[ƒVƒ‡ƒ“ƒJƒEƒ“ƒ^ */
-											/* player[12] ƒAƒjƒ[ƒVƒ‡ƒ“ƒtƒŒ[ƒ€w’è */
-											/* player[13] ƒWƒƒƒ“ƒvƒtƒŒ[ƒ€ƒJƒEƒ“ƒ^ */
-											/* player[14] ƒWƒƒƒ“ƒvƒJƒEƒ“ƒ^ */
-											/* player[15] ƒ~ƒX‚Ìê‡‚ÌX */
-											/* player[16] ƒ~ƒX‚Ìê‡‚ÌY */
-											/* player[17] –³“GŠÔ */
-											/* player[18] ’…’nƒ‚[ƒVƒ‡ƒ“—pƒJƒEƒ“ƒ^ */
-											/* player[19] ’Í‚ñ‚¾“_‚Å‚Ì‹——£ */
-											/* player[20] ˜r‚Ì•ûŒü */
-											/* player[21] ˜r‚Ì‹——£ */
-											/* player[22] ‰ñ“]•ûŒü */
-											/* player[23] ’Í‚Şƒtƒ‰ƒO */
-											/* player[24] ƒAƒ“ƒJ[ó‘Ô‚©‚çƒWƒƒƒ“ƒv‚µ‚½ */
-											/* player[25] ƒ{ƒ^ƒ“‚ğ‚¨‚µ‚ÄƒWƒƒƒ“ƒv‚µ‚½ƒtƒ‰ƒO */
-											/* player[26] ’·ŠÔ—‰º‚µ‚½ƒtƒ‰ƒOi’…’nƒtƒFƒNƒg—pj */
-											/* player[27] ’Í‚ñ‚¾‚Æ‚«‚É“ü—Í‚³‚ê‚Ä‚¢‚½ƒL[ */
-											/* player[28] ˆÚ“®°ƒ‚[ƒVƒ‡ƒ“ */
-											/* player[29] ‰¡‚Î‚Ë‚«”ò‚Ñ’† */
-											/* player[30] ƒAƒ“ƒJ[X */
-											/* player[31] ƒAƒ“ƒJ[Y */
-											/* player[32] ƒAƒ“ƒJ[’Í‚İˆÊ’uX */
-											/* player[33] ƒAƒ“ƒJ[’Í‚İˆÊ’uY */
-											/* player[34] ƒAƒ“ƒJ[‚Á”ò‚ÑX */
-											/* player[35] ƒAƒ“ƒJ[‚Á”ò‚ÑY */
-											/* player[36] ƒAƒ“ƒJ[‚Á”ò‚Ñ•ûŒü */
-											/* player[37] ƒAƒCƒeƒ€‚ğ’Í‚ñ‚Å‚¢‚é */
-											/* player[38] ƒAƒ“ƒJ[‚ğL‚Î‚µ‚½(Œø‰Ê‰¹—p) */
-static Sint32 dp_x;									/* ƒvƒŒƒCƒ„[‚Ì•\¦ˆÊ’ui‰æ–Ê“à‚Ì‘Š‘ÎÀ•Wj */
-static Sint32 dp_y;									/* ƒvƒŒƒCƒ„[‚Ì•\¦ˆÊ’ui‰æ–Ê“à‚Ì‘Š‘ÎÀ•Wj */
+											/* player[2] çŠ¶æ…‹ */
+											/* player[3] å‘ã */
+											/* player[4] BMPå†…ã®è¡¨ç¤ºä½ç½®X */
+											/* player[5] BMPå†…ã®è¡¨ç¤ºä½ç½®Y */
+											/* player[6] æ´ã¿ä¸­ã®ç§»å‹•è£œæ­£X */
+											/* player[7] æ´ã¿ä¸­ã®ç§»å‹•è£œæ­£Y */
+											/* player[8] ç¾åœ¨HP */
+											/* player[9] æ•µã‚’æ´ã‚“ã§ã„ã‚‹ */
+											/* player[10] ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ•ãƒ¬ãƒ¼ãƒ ã‚«ã‚¦ãƒ³ã‚¿ */
+											/* player[11] ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚«ã‚¦ãƒ³ã‚¿ */
+											/* player[12] ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ•ãƒ¬ãƒ¼ãƒ æŒ‡å®š */
+											/* player[13] ã‚¸ãƒ£ãƒ³ãƒ—ãƒ•ãƒ¬ãƒ¼ãƒ ã‚«ã‚¦ãƒ³ã‚¿ */
+											/* player[14] ã‚¸ãƒ£ãƒ³ãƒ—ã‚«ã‚¦ãƒ³ã‚¿ */
+											/* player[15] ãƒŸã‚¹ã®å ´åˆã®X */
+											/* player[16] ãƒŸã‚¹ã®å ´åˆã®Y */
+											/* player[17] ç„¡æ•µæ™‚é–“ */
+											/* player[18] ç€åœ°ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ã‚«ã‚¦ãƒ³ã‚¿ */
+											/* player[19] æ´ã‚“ã æ™‚ç‚¹ã§ã®è·é›¢ */
+											/* player[20] è…•ã®æ–¹å‘ */
+											/* player[21] è…•ã®è·é›¢ */
+											/* player[22] å›è»¢æ–¹å‘ */
+											/* player[23] æ´ã‚€ãƒ•ãƒ©ã‚° */
+											/* player[24] ã‚¢ãƒ³ã‚«ãƒ¼çŠ¶æ…‹ã‹ã‚‰ã‚¸ãƒ£ãƒ³ãƒ—ã—ãŸ */
+											/* player[25] ãƒœã‚¿ãƒ³ã‚’ãŠã—ã¦ã‚¸ãƒ£ãƒ³ãƒ—ã—ãŸãƒ•ãƒ©ã‚° */
+											/* player[26] é•·æ™‚é–“è½ä¸‹ã—ãŸãƒ•ãƒ©ã‚°ï¼ˆç€åœ°ãƒ•ã‚§ã‚¯ãƒˆç”¨ï¼‰ */
+											/* player[27] æ´ã‚“ã ã¨ãã«å…¥åŠ›ã•ã‚Œã¦ã„ãŸã‚­ãƒ¼ */
+											/* player[28] ç§»å‹•åºŠãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ */
+											/* player[29] æ¨ªã°ã­å¹ãé£›ã³ä¸­ */
+											/* player[30] ã‚¢ãƒ³ã‚«ãƒ¼X */
+											/* player[31] ã‚¢ãƒ³ã‚«ãƒ¼Y */
+											/* player[32] ã‚¢ãƒ³ã‚«ãƒ¼æ´ã¿ä½ç½®X */
+											/* player[33] ã‚¢ãƒ³ã‚«ãƒ¼æ´ã¿ä½ç½®Y */
+											/* player[34] ã‚¢ãƒ³ã‚«ãƒ¼å¹ã£é£›ã³X */
+											/* player[35] ã‚¢ãƒ³ã‚«ãƒ¼å¹ã£é£›ã³Y */
+											/* player[36] ã‚¢ãƒ³ã‚«ãƒ¼å¹ã£é£›ã³æ–¹å‘ */
+											/* player[37] ã‚¢ã‚¤ãƒ†ãƒ ã‚’æ´ã‚“ã§ã„ã‚‹ */
+											/* player[38] ã‚¢ãƒ³ã‚«ãƒ¼ã‚’ä¼¸ã°ã—ãŸ(åŠ¹æœéŸ³ç”¨) */
+static Sint32 dp_x;									/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®è¡¨ç¤ºä½ç½®ï¼ˆç”»é¢å†…ã®ç›¸å¯¾åº§æ¨™ï¼‰ */
+static Sint32 dp_y;									/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®è¡¨ç¤ºä½ç½®ï¼ˆç”»é¢å†…ã®ç›¸å¯¾åº§æ¨™ï¼‰ */
 static Sint32 demo[10];
-static Sint32 map1[320];								/* ”wŒi—pƒoƒbƒtƒ@ ƒŒƒCƒ„[1 */
-static Sint32 map2[320];								/* ”wŒi—pƒoƒbƒtƒ@ ƒŒƒCƒ„[2 */
+static Sint32 map1[320];								/* èƒŒæ™¯ç”¨ãƒãƒƒãƒ•ã‚¡ ãƒ¬ã‚¤ãƒ¤ãƒ¼1 */
+static Sint32 map2[320];								/* èƒŒæ™¯ç”¨ãƒãƒƒãƒ•ã‚¡ ãƒ¬ã‚¤ãƒ¤ãƒ¼2 */
 static Sint32 map_data[20];
-static Sint32 bak_cnt = 0;							/* ”wŒiƒAƒjƒ[ƒVƒ‡ƒ“—pƒJƒEƒ“ƒ^ */
-static Sint32 d_x = 0;								/* ”wŒi•\¦ˆÊ’u */
-static Sint32 d_y = 0;								/* ”wŒi•\¦ˆÊ’u */
-//static Sint32 disp_data[60];							/* ƒZ[ƒuˆê—— */
-static Sint32 next_px = 0;							/* ‰æ–ÊØ‚è‘Ö‚¦‚ÌƒLƒƒƒ‰ˆÚ“®‘Îô */
+static Sint32 bak_cnt = 0;							/* èƒŒæ™¯ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ã‚«ã‚¦ãƒ³ã‚¿ */
+static Sint32 d_x = 0;								/* èƒŒæ™¯è¡¨ç¤ºä½ç½® */
+static Sint32 d_y = 0;								/* èƒŒæ™¯è¡¨ç¤ºä½ç½® */
+//static Sint32 disp_data[60];							/* ã‚»ãƒ¼ãƒ–ä¸€è¦§ */
+static Sint32 next_px = 0;							/* ç”»é¢åˆ‡ã‚Šæ›¿ãˆæ™‚ã®ã‚­ãƒ£ãƒ©ç§»å‹•å¯¾ç­– */
 static Sint32 next_py = 0;
 
-static Sint32 atk_rr1 =22;						/* ˜r‚Ì‰ñ“]‘¬“x */
-static Sint32 atk_rr2 = 1;						/* ˜r‚Ì‰ñ“]‘¬“x */
-//Sint32 atk_rr = 360 / 32;						/* ˜r‚Ì‰ñ“]‘¬“x */
+static Sint32 atk_rr1 =22;						/* è…•ã®å›è»¢é€Ÿåº¦ */
+static Sint32 atk_rr2 = 1;						/* è…•ã®å›è»¢é€Ÿåº¦ */
+//Sint32 atk_rr = 360 / 32;						/* è…•ã®å›è»¢é€Ÿåº¦ */
 
-static Sint32 stage = 0;								/* ƒXƒe[ƒW”Ô† */
+static Sint32 stage = 0;								/* ã‚¹ãƒ†ãƒ¼ã‚¸ç•ªå· */
 
-static Sint32 pshot[10 * 10];							/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-static Sint32 pshotf[10 * 40];						/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-static Sint32 pshotf2[10 * 80];						/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-static Sint32 pmshot[20 * 40];						/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-static Sint32 pjumpf[100];							/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-static Sint32 item[10 * 50];							/* ƒAƒCƒeƒ€—pƒoƒbƒtƒ@ */
-static Sint32 item_wk[5*100];							/* ’n–Ê ‚»‚Ì‘¼‚Ìƒ}ƒbƒvî•ñ */
-static Sint32 enemy[40 * 20];								/* “Gî•ñ															*/
-static Sint32 mgc_e[10 * 20] ;						/* MGC•\¦î•ñ														*/
-static Sint32 p_ef[1000] ;							/* ”Ä—pƒoƒbƒtƒ@i‘«Õ“™j														*/
-//static Sint32 life_a[5];								/* HPƒAƒjƒ[ƒVƒ‡ƒ“—p */
-static Sint32 kane[200];								/* ƒAƒCƒeƒ€—pƒoƒbƒtƒ@ */
+static Sint32 pshot[10 * 10];							/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+static Sint32 pshotf[10 * 40];						/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+static Sint32 pshotf2[10 * 80];						/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+static Sint32 pmshot[20 * 40];						/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+static Sint32 pjumpf[100];							/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+static Sint32 item[10 * 50];							/* ã‚¢ã‚¤ãƒ†ãƒ ç”¨ãƒãƒƒãƒ•ã‚¡ */
+static Sint32 item_wk[5*100];							/* åœ°é¢ ãã®ä»–ã®ãƒãƒƒãƒ—æƒ…å ± */
+static Sint32 enemy[40 * 20];								/* æ•µæƒ…å ±															*/
+static Sint32 mgc_e[10 * 20] ;						/* MGCè¡¨ç¤ºæƒ…å ±														*/
+static Sint32 p_ef[1000] ;							/* æ±ç”¨ãƒãƒƒãƒ•ã‚¡ï¼ˆè¶³è·¡ç­‰ï¼‰														*/
+//static Sint32 life_a[5];								/* HPã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ */
+static Sint32 kane[200];								/* ã‚¢ã‚¤ãƒ†ãƒ ç”¨ãƒãƒƒãƒ•ã‚¡ */
 
 static Sint32 Jump_counts = 0;
-static Sint32 save_data[400];							/* •Û‘¶î•ñ */
+static Sint32 save_data[400];							/* ä¿å­˜æƒ…å ± */
 static Sint32 test[5];
-static Sint32 rayer[5];								/* ”wŒiƒXƒNƒ[ƒ‹—Ê */
+static Sint32 rayer[5];								/* èƒŒæ™¯ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«é‡ */
 static Sint32 play_time[5];
-/* ƒŠƒvƒŒƒC‚Q‚O•ª */
+/* ãƒªãƒ—ãƒ¬ã‚¤ï¼’ï¼åˆ† */
 
 #define MAX_REPLAY_SIZE 60 * 60 * 10
 #define SUPER_MAX_REPLAY_SIZE 60 * 60 * 20
 
-static Sint32 replay[MAX_REPLAY_SIZE];	/* ƒtƒŒ[ƒ€–•b–•ª */
+static Sint32 replay[MAX_REPLAY_SIZE];	/* ãƒ•ãƒ¬ãƒ¼ãƒ ï¼Šç§’ï¼Šåˆ† */
 static Sint32 replay_time = 1;
-static Sint32 replay_time_MAX = MAX_REPLAY_SIZE;	/* Å‘åŠÔ */
+static Sint32 replay_time_MAX = MAX_REPLAY_SIZE;	/* æœ€å¤§æ™‚é–“ */
 static Sint32 replay_load_key[10];
-static Sint32 replay_save_flag = 0;				/* •Û‘¶‚ğs‚¤‚© 1:‚µ‚È‚¢ */
-static Sint32 rrkey[5];								/* “ü—ÍƒL[•ûŒü */
+static Sint32 replay_save_flag = 0;				/* ä¿å­˜ã‚’è¡Œã†ã‹ 1:ã—ãªã„ */
+static Sint32 rrkey[5];								/* å…¥åŠ›ã‚­ãƒ¼æ–¹å‘ */
 
 //static Sint32 event_buff[100];
-/* event_buff[0]	•¶š—p³¨İÄŞ³•\¦ */
-/* event_buff[1]	Šç•\¦ */
-/* event_buff[2]	·°“ü—Í‘Ò‚¿ */
+/* event_buff[0]	æ–‡å­—ç”¨ï½³ï½¨ï¾ï¾„ï¾ï½³è¡¨ç¤º */
+/* event_buff[1]	é¡”è¡¨ç¤º */
+/* event_buff[2]	ï½·ï½°å…¥åŠ›å¾…ã¡ */
 /* event_buff[3]	wait */
-/* event_buff[4]	ÀsƒCƒxƒ“ƒgƒoƒbƒtƒ@ƒ|ƒCƒ“ƒ^ */
-/* event_buff[5]	Šç•\¦ */
+/* event_buff[4]	å®Ÿè¡Œã‚¤ãƒ™ãƒ³ãƒˆãƒãƒƒãƒ•ã‚¡ãƒã‚¤ãƒ³ã‚¿ */
+/* event_buff[5]	é¡”è¡¨ç¤º */
 /* event_buff[7]	i */
 /* event_buff[8]	player[2] */
 /* event_buff[9]	player[3] */
-/* event_buff[10]	‰æ–ÊXV */
-/* event_buff[11]	‰æ–Ê‰‰o */
+/* event_buff[10]	ç”»é¢æ›´æ–° */
+/* event_buff[11]	ç”»é¢æ¼”å‡º */
 
-/* TextLayer( 10 )‚Í²ÍŞİÄ‚Åg—piŒÅ’èj */
-/* ƒvƒŒ[ƒ“80`90‚Í²ÍŞİÄ‚Åg—p */
-/* wav30‚Í²ÍŞİÄ‚Åg—p */
+/* TextLayer( 10 )ã¯ï½²ï¾ï¾ï¾ï¾„ã§ä½¿ç”¨ï¼ˆå›ºå®šï¼‰ */
+/* ãƒ—ãƒ¬ãƒ¼ãƒ³80ã€œ90ã¯ï½²ï¾ï¾ï¾ï¾„ã§ä½¿ç”¨ */
+/* wav30ã¯ï½²ï¾ï¾ï¾ï¾„ã§ä½¿ç”¨ */
 //static Sint32 file_handle = 0	;
-static Sint32 one_event = 0;							/* d‚È‚Á‚Ä”­¶‚·‚éƒCƒxƒ“ƒg‚Ì‘O‰ñd‚È‚Á‚Ä‚¢‚½‚©‚Ìƒtƒ‰ƒO */
-//static Sint32 start_plyer_disp = 1;					/* ŠJn‚É•\¦‚·‚é‚©ƒtƒ‰ƒO */
-//static Sint32 start_effct_disp = 0;					/* ŠJn‚ÉŒø‰Ê‚ğ•\¦‚·‚é‚©ƒtƒ‰ƒO */
+static Sint32 one_event = 0;							/* é‡ãªã£ã¦ç™ºç”Ÿã™ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆã®å‰å›é‡ãªã£ã¦ã„ãŸã‹ã®ãƒ•ãƒ©ã‚° */
+//static Sint32 start_plyer_disp = 1;					/* é–‹å§‹æ™‚ã«è¡¨ç¤ºã™ã‚‹ã‹ãƒ•ãƒ©ã‚° */
+//static Sint32 start_effct_disp = 0;					/* é–‹å§‹æ™‚ã«åŠ¹æœã‚’è¡¨ç¤ºã™ã‚‹ã‹ãƒ•ãƒ©ã‚° */
 
 #define DEBUG_DISP (0)
 
 //----------------------------------------------------------------------
-// ƒƒCƒ“ŠÖ”
+// ãƒ¡ã‚¤ãƒ³é–¢æ•°
 void act_main( void )
 {
 	Sint32 exit_code;
 	
-	act_init( );		// ‰Šú‰»
+	act_init( );		// åˆæœŸåŒ–
 	
 	while( scene_exit )
 	{
-//		KeyInput( );	// ƒL[“ü—Í
+//		KeyInput( );	// ã‚­ãƒ¼å…¥åŠ›
 		
-//		act_keys( );		// ƒL[ˆ—
-		act_drow( );		// •`‰æ
+//		act_keys( );		// ã‚­ãƒ¼å‡¦ç†
+		act_drow( );		// æç”»
 		
-		FPSWait( );		// ‘Ò‚¿
+		FPSWait( );		// å¾…ã¡
 
 		exit_code = system_keys( );  //
 		if ( exit_code == 0 )
@@ -319,13 +311,8 @@ void act_main( void )
 		}
 	}
 	
-	act_relese( );		// I—¹
+	act_relese( );		// çµ‚äº†
 }
-
-#ifdef DREAMCAST
-/* Yes; this mess is really required to avoid issues with music playback */
-static int32_t old = 0;
-#endif
 
 void act_init( void )
 {
@@ -341,14 +328,6 @@ void act_init( void )
 #ifdef MINGW
 	sprintf(path_work, "save/work.sav");
 	sprintf(path_item, "save/item_wk.sav");
-#elif defined(DREAMCAST)
-	// If level is the same, then just pause
-	if (old == save_data[3])
-	{
-		Pause_Music();
-	}
-	sprintf(path_work, "/ram/work.sav");
-	sprintf(path_item, "/ram/item_wk.sav");
 #elif defined(RELATIVE_PATH)
 	sprintf(path_work, "work.sav");
 	sprintf(path_item, "item_wk.sav");
@@ -359,59 +338,54 @@ void act_init( void )
 
 	scene_exit = 1;
 	sn = 0;
-	bak_cnt = 0;							/* ”wŒiƒAƒjƒ[ƒVƒ‡ƒ“—pƒJƒEƒ“ƒ^ */
-	d_x = 0;								/* ”wŒi•\¦ˆÊ’u */
-	d_y = 0;								/* ”wŒi•\¦ˆÊ’u */
-	next_px = 0;							/* ‰æ–ÊØ‚è‘Ö‚¦‚ÌƒLƒƒƒ‰ˆÚ“®‘Îô */
+	bak_cnt = 0;							/* èƒŒæ™¯ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç”¨ã‚«ã‚¦ãƒ³ã‚¿ */
+	d_x = 0;								/* èƒŒæ™¯è¡¨ç¤ºä½ç½® */
+	d_y = 0;								/* èƒŒæ™¯è¡¨ç¤ºä½ç½® */
+	next_px = 0;							/* ç”»é¢åˆ‡ã‚Šæ›¿ãˆæ™‚ã®ã‚­ãƒ£ãƒ©ç§»å‹•å¯¾ç­– */
 	next_py = 0;
-	atk_rr1 =22;						/* ˜r‚Ì‰ñ“]‘¬“x */
-	atk_rr2 = 1;						/* ˜r‚Ì‰ñ“]‘¬“x */
-	stage = 0;								/* ƒXƒe[ƒW”Ô† */
+	atk_rr1 =22;						/* è…•ã®å›è»¢é€Ÿåº¦ */
+	atk_rr2 = 1;						/* è…•ã®å›è»¢é€Ÿåº¦ */
+	stage = 0;								/* ã‚¹ãƒ†ãƒ¼ã‚¸ç•ªå· */
 	Jump_counts = 0;
 	replay_time = 1;
-	replay_time_MAX = SUPER_MAX_REPLAY_SIZE;	/* Å‘åŠÔ */
-	replay_save_flag = 0;				/* •Û‘¶‚ğs‚¤‚© 1:‚µ‚È‚¢ */
-	one_event = 0;							/* d‚È‚Á‚Ä”­¶‚·‚éƒCƒxƒ“ƒg‚Ì‘O‰ñd‚È‚Á‚Ä‚¢‚½‚©‚Ìƒtƒ‰ƒO */
+	replay_time_MAX = SUPER_MAX_REPLAY_SIZE;	/* æœ€å¤§æ™‚é–“ */
+	replay_save_flag = 0;				/* ä¿å­˜ã‚’è¡Œã†ã‹ 1:ã—ãªã„ */
+	one_event = 0;							/* é‡ãªã£ã¦ç™ºç”Ÿã™ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆã®å‰å›é‡ãªã£ã¦ã„ãŸã‹ã®ãƒ•ãƒ©ã‚° */
 
 //#if false
-	memset( player, 0, sizeof( player ) );									/* ƒvƒŒƒCƒ„[—pƒoƒbƒtƒ@ */
+	memset( player, 0, sizeof( player ) );									/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ç”¨ãƒãƒƒãƒ•ã‚¡ */
 	memset( demo, 0, sizeof( demo ) );
-	memset( map1, 0, sizeof( map1 ) );								/* ”wŒi—pƒoƒbƒtƒ@ ƒŒƒCƒ„[1 */
-	memset( map2, 0, sizeof( map2 ) );								/* ”wŒi—pƒoƒbƒtƒ@ ƒŒƒCƒ„[2 */
+	memset( map1, 0, sizeof( map1 ) );								/* èƒŒæ™¯ç”¨ãƒãƒƒãƒ•ã‚¡ ãƒ¬ã‚¤ãƒ¤ãƒ¼1 */
+	memset( map2, 0, sizeof( map2 ) );								/* èƒŒæ™¯ç”¨ãƒãƒƒãƒ•ã‚¡ ãƒ¬ã‚¤ãƒ¤ãƒ¼2 */
 	memset( map_data, 0, sizeof( map_data ) );
-	memset( pshot, 0, sizeof( pshot ) );							/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-	memset( pshotf, 0, sizeof( pshotf ) );						/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-	memset( pshotf2, 0, sizeof( pshotf2 ) );						/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-	memset( pmshot, 0, sizeof( pmshot ) );						/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-	memset( pjumpf, 0, sizeof( pjumpf ) );							/* ƒvƒŒƒCƒ„[UŒ‚—pî•ñ */
-	memset( item, 0, sizeof( item ) );							/* ƒAƒCƒeƒ€—pƒoƒbƒtƒ@ */
-	memset( item_wk, 0, sizeof( item_wk ) );							/* ’n–Ê ‚»‚Ì‘¼‚Ìƒ}ƒbƒvî•ñ */
-	memset( enemy, 0, sizeof( enemy ) );								/* “Gî•ñ															*/
-	memset( mgc_e, 0, sizeof( mgc_e ) ) ;						/* MGC•\¦î•ñ														*/
-	memset( p_ef, 0, sizeof( p_ef ) ) ;							/* ”Ä—pƒoƒbƒtƒ@i‘«Õ“™j														*/
-	memset( kane, 0, sizeof( kane ) );								/* ƒAƒCƒeƒ€—pƒoƒbƒtƒ@ */
-	memset( save_data, 0, sizeof( save_data ) );							/* •Û‘¶î•ñ */
+	memset( pshot, 0, sizeof( pshot ) );							/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+	memset( pshotf, 0, sizeof( pshotf ) );						/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+	memset( pshotf2, 0, sizeof( pshotf2 ) );						/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+	memset( pmshot, 0, sizeof( pmshot ) );						/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+	memset( pjumpf, 0, sizeof( pjumpf ) );							/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ”»æ’ƒç”¨æƒ…å ± */
+	memset( item, 0, sizeof( item ) );							/* ã‚¢ã‚¤ãƒ†ãƒ ç”¨ãƒãƒƒãƒ•ã‚¡ */
+	memset( item_wk, 0, sizeof( item_wk ) );							/* åœ°é¢ ãã®ä»–ã®ãƒãƒƒãƒ—æƒ…å ± */
+	memset( enemy, 0, sizeof( enemy ) );								/* æ•µæƒ…å ±															*/
+	memset( mgc_e, 0, sizeof( mgc_e ) ) ;						/* MGCè¡¨ç¤ºæƒ…å ±														*/
+	memset( p_ef, 0, sizeof( p_ef ) ) ;							/* æ±ç”¨ãƒãƒƒãƒ•ã‚¡ï¼ˆè¶³è·¡ç­‰ï¼‰														*/
+	memset( kane, 0, sizeof( kane ) );								/* ã‚¢ã‚¤ãƒ†ãƒ ç”¨ãƒãƒƒãƒ•ã‚¡ */
+	memset( save_data, 0, sizeof( save_data ) );							/* ä¿å­˜æƒ…å ± */
 	memset( test, 0, sizeof( test ) );
-	memset( rayer, 0, sizeof( rayer ) );								/* ”wŒiƒXƒNƒ[ƒ‹—Ê */
+	memset( rayer, 0, sizeof( rayer ) );								/* èƒŒæ™¯ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«é‡ */
 	memset( play_time, 0, sizeof( play_time ) );
-	memset( replay, 0, sizeof( replay ) );	/* ƒtƒŒ[ƒ€–•b–•ª */
+	memset( replay, 0, sizeof( replay ) );	/* ãƒ•ãƒ¬ãƒ¼ãƒ ï¼Šç§’ï¼Šåˆ† */
 	memset( replay_load_key, 0, sizeof( replay_load_key ) );
-	memset( rrkey, 0, sizeof( rrkey ) );								/* “ü—ÍƒL[•ûŒü */
-	memset( string, 0, sizeof( string ) );								/* “ü—ÍƒL[•ûŒü */
+	memset( rrkey, 0, sizeof( rrkey ) );								/* å…¥åŠ›ã‚­ãƒ¼æ–¹å‘ */
+	memset( string, 0, sizeof( string ) );								/* å…¥åŠ›ã‚­ãƒ¼æ–¹å‘ */
 
-	ResetGameFlag2();				/* ƒtƒ@ƒCƒ‹‚È‚µ */
+	/* ã‹ã‘ã‚‰å–å¾—æƒ…å ± */
+	ResetGameFlag2();				/* ãƒ•ã‚¡ã‚¤ãƒ«ãªã— */
 	for ( i = 0; i < 500; i++ )
 	{
 		item_wk[i] = gameflag2[i];
 	}
 	
 	ResetGameFlag2( );
-
-#ifdef DREAMCAST
-	DC_LoadVMU("gan_work.sav", path_work);
-	DC_LoadVMU("gan_item.sav", path_item);
-#endif
-
 	LoadGameFlag2(path_work);
 	
 	for ( i = 0; i < 400; i++ )
@@ -420,7 +394,7 @@ void act_init( void )
 	}
 	player[8] = 1;	/* HP */
 	stage = save_data[2];
-	d_num = save_data[3]; 	/* ‰æ–Ê */
+	d_num = save_data[3]; 	/* ç”»é¢ */
 	gameflag[120] = d_num;
 
 
@@ -428,6 +402,8 @@ void act_init( void )
 	player[21] = 32;
 	player[22] = 1;
 
+
+	/* ãƒ¬ã‚¤ãƒ¤ãƒ¼ï¼‘ */
 	ResetGameFlag2( );
 	sprintf(string,MAP_DATA_PATH "%d_%d.map", ( int )stage , ( int )1, ( int )d_num );
 	if ( LoadGameFlag2(string) == 0 )
@@ -439,102 +415,17 @@ void act_init( void )
 	}
 	else 
 	{
-		if ( gameflag[132] == 1 )
+		/* ãƒ•ã‚¡ã‚¤ãƒ«ãŒãªã„ */
+		if ( gameflag[132] == 1 )	/* ãƒªãƒ—ãƒ¬ã‚¤ */
 		{
-			g_scene = EN_SN_TITLE;
+			g_scene = EN_SN_TITLE;	/* ã‚¿ã‚¤ãƒˆãƒ«ã¸ */
 		}
 		else 
 		{
-			g_scene = EN_SN_ENDING;	
+			g_scene = EN_SN_ENDING;	/* ã‚¿ã‚¤ãƒˆãƒ«ã¸ */
 		}
 		sn = 10;
 	}
-/* Yes, this ugly mess is to stop the Dreamcast (or rather the ADX driver) from crashing */
-#ifdef DREAMCAST
-	if ( gameflag[70] == 1 )
-	{
-		if (
-		     ( ( save_data[3] >  0 ) && ( save_data[3] <=  5 ) ) 
-		  || ( ( save_data[3] > 20 ) && ( save_data[3] <= 25 ) )
-		  || ( ( save_data[3] > 40 ) && ( save_data[3] <= 45 ) )
-		   )
-		{
-			Stop_Music();
-		}
-		else if (
-		     ( ( save_data[3] > 45 ) && ( save_data[3] <= 50 ) )
-		   )
-		{
-			Stop_Music();
-		}
-		if (
-		     ( ( save_data[3] >  5 ) && ( save_data[3] <= 10 ) ) 
-		  || ( ( save_data[3] > 25 ) && ( save_data[3] <= 30 ) )
-		  || ( ( save_data[3] > 35 ) && ( save_data[3] <= 40 ) )
-		   )
-		{
-			Stop_Music();
-		}
-		else if (
-		     ( ( save_data[3] > 10 ) && ( save_data[3] <= 15 ) ) 
-		  || ( ( save_data[3] > 30 ) && ( save_data[3] <= 35 ) )
-		   )
-		{
-			Stop_Music();
-		}
-		else if (
-		     ( ( save_data[3] > 15 ) && ( save_data[3] <= 20 ) ) 
-		  || ( ( save_data[3] > 35 ) && ( save_data[3] <= 40 ) )
-		   )
-		{
-			Stop_Music();
-		}
-		else
-		{
-			Pause_Music();
-		}
-	}
-	else 
-	{
-		if ( gameflag[71] == 0 )
-		{
-			if ( (save_data[3] ==  1) || (save_data[3] == 21) || (save_data[3] == 41 ))
-			{
-				Stop_Music();
-			}
-			else if (save_data[3] == 46)
-			{
-				Stop_Music();
-			}
-			else if (
-			     ( ( save_data[3] ==  6 ) ) 
-			  || ( ( save_data[3] == 26 ) )
-			   )
-			{
-				Stop_Music();
-			}
-			else if (
-			     ( ( save_data[3] == 11 ) ) 
-			  || ( ( save_data[3] == 31 ) )
-			   )
-			{
-				Stop_Music();
-			}
-			else if (
-			     ( ( save_data[3] == 16 ) ) 
-			  || ( ( save_data[3] == 36 ) )
-			   )
-			{
-				Stop_Music();
-			}
-			else
-			{
-				Pause_Music();
-			}
-		}
-	}
-	old = save_data[3];
-#endif
 	
 	for ( i = 0 ; i < 20 ; i++ )
 	{
@@ -546,7 +437,7 @@ void act_init( void )
 		if ( map_data[11 + i] != 0 )
 		{
 			sprintf(string,BAK_IMAGE_PATH "%d.bmp", ( int )map_data[11 + i] );
-			if ( LoadBitmap(string,110 + i , 0 ) != 0 )	
+			if ( LoadBitmap(string,110 + i , 0 ) != 0 )	//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 			{
 				ReleaseBitmap(110 + i);
 			}
@@ -556,6 +447,7 @@ void act_init( void )
 	player[0] = map_data[9] * 32;
 	player[1] = ( map_data[10] * 32 ) - 16;
 	
+	/* ãƒ¬ã‚¤ãƒ¤ãƒ¼ï¼’ */
 	ResetGameFlag2( );
 	sprintf(string,MAP_DATA_PATH "%d_%d.map", ( int )stage , ( int )2, ( int )d_num );
 	if ( LoadGameFlag2(string) == 0 )
@@ -566,6 +458,7 @@ void act_init( void )
 		}
 	}
 
+	/* ã‚¢ã‚¤ãƒ†ãƒ é…ç½® */
 	ResetGameFlag2( );
 	sprintf(string,MAP_DATA_PATH "i%d_%d.map", ( int )stage , ( int )1, ( int )d_num );
 	if ( LoadGameFlag2(string) == 0 )
@@ -584,11 +477,11 @@ void act_init( void )
 
 
 	
-	ResetGameFlag2();				/* ƒtƒ@ƒCƒ‹‚È‚µ */
+	ResetGameFlag2();				/* ãƒ•ã‚¡ã‚¤ãƒ«ãªã— */
 	sprintf( string,MAP_DATA_PATH "e%d_%d.map", ( int )stage , ( int )1, ( int )d_num );
-	if ( LoadGameFlag2( string ) == 0 )	/* “G”z’u */
+	if ( LoadGameFlag2( string ) == 0 )	/* æ•µé…ç½® */
 	{
-		/* “G”z’u */
+		/* æ•µé…ç½® */
 		for ( x = 0; x <= 19 ; x++ )
 		{
 			for ( y = 0; y <= 16 ; y++ )
@@ -611,7 +504,8 @@ void act_init( void )
 	{
 		if ( 1 != replay_file_load( ) )
 		{
-			g_scene = EN_SN_TITLE;	/* ƒ^ƒCƒgƒ‹‚Ö */
+			/* ãƒ•ã‚¡ã‚¤ãƒ«ãŒèª­ã‚ãªã‹ã£ãŸ */
+			g_scene = EN_SN_TITLE;	/* ã‚¿ã‚¤ãƒˆãƒ«ã¸ */
 			sn = 10;
 			return;
 		}
@@ -620,7 +514,7 @@ void act_init( void )
 	{
 	}
 
-	if ( gameflag[127] == 1 )	//ƒg[ƒ^ƒ‹ƒAƒ^ƒbƒN
+	if ( gameflag[127] == 1 )	//ãƒˆãƒ¼ã‚¿ãƒ«ã‚¢ã‚¿ãƒƒã‚¯
 	{
 		wk = get2keta( gameflag[135] , 1 );
 		play_time[0] = play_time[0] + wk;
@@ -660,12 +554,12 @@ void act_init( void )
 	}
 
 	sprintf(string,PLAYER_IMAGE_PATH "ri%d.bmp", ( int )gameflag[122] );
-	LoadBitmap(string,1,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(PLAYER_IMAGE_PATH "mgc1.bmp",2,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(PLAYER_IMAGE_PATH "atk1.bmp",3,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(PLAYER_IMAGE_PATH "atk2.bmp",4,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(string,1,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(PLAYER_IMAGE_PATH "mgc1.bmp",2,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(PLAYER_IMAGE_PATH "atk1.bmp",3,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(PLAYER_IMAGE_PATH "atk2.bmp",4,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 
-	LoadBitmap(PLAYER_IMAGE_PATH "atkf.bmp",5,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(PLAYER_IMAGE_PATH "atkf.bmp",5,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 
 	sprintf(string,MAP_IMAGE_PATH "map%d_1.bmp", ( int )stage );
 	
@@ -678,40 +572,40 @@ void act_init( void )
 	LoadBitmap(string,12,true);
 
 
-	LoadBitmap(SYS_IMAGE_PATH "map_f0.bmp",15,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "map_f1.bmp",16,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "map_f2.bmp",17,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "fonts2.bmp",18,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "sc.bmp",19,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(SYS_IMAGE_PATH "map_f0.bmp",15,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "map_f1.bmp",16,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "map_f2.bmp",17,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "fonts2.bmp",18,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "sc.bmp",19,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 
-	LoadBitmap(SYS_IMAGE_PATH "p_data.bmp",20,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "skill.bmp",21,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "hp.bmp",22,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "hp2.bmp",23,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(SYS_IMAGE_PATH "p_data.bmp",20,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "skill.bmp",21,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "hp.bmp",22,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "hp2.bmp",23,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 	
-	LoadBitmap(SYS_IMAGE_PATH "pause.bmp",24,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(SYS_IMAGE_PATH "pause.bmp",24,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 	
-	LoadBitmap(ENM_IMAGE_PATH "e32.bmp",40,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(ENM_IMAGE_PATH "e48.bmp",41,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(ENM_IMAGE_PATH "e64.bmp",42,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(ENM_IMAGE_PATH "e32.bmp",40,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(ENM_IMAGE_PATH "e48.bmp",41,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(ENM_IMAGE_PATH "e64.bmp",42,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 	
-	LoadBitmap(ENM_IMAGE_PATH "e_shot.bmp",50,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(ENM_IMAGE_PATH "e_shot.bmp",50,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 
-	LoadBitmap(PLAYER_IMAGE_PATH "font_d.bmp",51,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(PLAYER_IMAGE_PATH "hp.bmp",52,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(PLAYER_IMAGE_PATH "font_d.bmp",51,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(PLAYER_IMAGE_PATH "hp.bmp",52,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 	
 
-	LoadBitmap(SYS_IMAGE_PATH "menu.bmp",60,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(TITLE_IMAGE_PATH "scl.bmp",61,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "window_item.bmp",62,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(SYS_IMAGE_PATH "menu.bmp",60,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(TITLE_IMAGE_PATH "scl.bmp",61,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "window_item.bmp",62,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 
-	LoadBitmap(PLAYER_IMAGE_PATH "arm.bmp",65,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(PLAYER_IMAGE_PATH "arm2.bmp",66,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "input.bmp",67,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "new.bmp",68,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "new2.bmp",69,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(SYS_IMAGE_PATH "mini_map.bmp",70,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
-	LoadBitmap(BAK_IMAGE_PATH "0.bmp",72,true);					//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+	LoadBitmap(PLAYER_IMAGE_PATH "arm.bmp",65,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(PLAYER_IMAGE_PATH "arm2.bmp",66,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "input.bmp",67,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "new.bmp",68,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "new2.bmp",69,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(SYS_IMAGE_PATH "mini_map.bmp",70,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
+	LoadBitmap(BAK_IMAGE_PATH "0.bmp",72,true);					//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 
 	/*LoadBitmap(SYS_IMAGE_PATH "waku.bmp",109,true);*/				
 	LoadBitmap(IMAGE_PATH "color.bmp",127,false);
@@ -806,9 +700,6 @@ void act_init( void )
 	}
 	gameflag[71] = 0;
 	gameflag[70] = 0;
-#ifdef DREAMCAST
-	Resume_Music();
-#endif
 }
 
 void act_relese( void )
@@ -863,26 +754,26 @@ void act_keys( void )
 	}
 	if ( gameflag[132] == 0 )
 	{
-		replay_input_save( );		/* ƒŠƒvƒŒƒCƒf[ƒ^•Û‘¶ */
+		replay_input_save( );		/* ãƒªãƒ—ãƒ¬ã‚¤ãƒ‡ãƒ¼ã‚¿ä¿å­˜ */
 	}
 	else 
 	{
-		replay_input_load( );		/* ƒŠƒvƒŒƒCƒf[ƒ^Ä¶ */
+		replay_input_load( );		/* ãƒªãƒ—ãƒ¬ã‚¤ãƒ‡ãƒ¼ã‚¿å†ç”Ÿ */
 	}
 	replay_time++;
 	if ( replay_time > replay_time_MAX )
 	{
-		replay_time = replay_time_MAX;	/* Å‘åŠÔ‚ğ‰z‚¦‚½A•Û‘¶‚µ‚È‚¢ */
-		replay_save_flag = 1;			/* •Û‘¶‚µ‚È‚¢ */
+		replay_time = replay_time_MAX;	/* æœ€å¤§æ™‚é–“ã‚’è¶ŠãˆãŸã€ä¿å­˜ã—ãªã„ */
+		replay_save_flag = 1;			/* ä¿å­˜ã—ãªã„ */
 	}
 
 	for ( i = 0; i < 5; i++ )
 	{
-		rrkey[i] = 0;						/* “ü—ÍƒL[•ûŒü */
+		rrkey[i] = 0;						/* å…¥åŠ›ã‚­ãƒ¼æ–¹å‘ */
 	}
 
 
-	player[17]--;			/* –³“GŠÔ */
+	player[17]--;			/* ç„¡æ•µæ™‚é–“ */
 	if ( player[17] <= 0 )
 	{
 		player[17] = 0;
@@ -893,7 +784,7 @@ void act_keys( void )
 	}
 	
 	
-	if ( ( item_up( ) != -1 ) && ( player[14] == 10 ) )	/* ƒAƒCƒeƒ€‚Ìã‚Éæ‚Á‚Ä‚¢‚é */
+	if ( ( item_up( ) != -1 ) && ( player[14] == 10 ) )	/* ã‚¢ã‚¤ãƒ†ãƒ ã®ä¸Šã«ä¹—ã£ã¦ã„ã‚‹ */
 	{
 		player[1] = item_up( ); 
 	}
@@ -919,18 +810,18 @@ void act_keys( void )
 		if ( player[9] == 1 )
 		{			
 			muki = -1;
-			if ( ( ( IsPressKey( gameflag[0] ) ) && ( gameflag[132] == 0 ) )		// ã
+			if ( ( ( IsPressKey( gameflag[0] ) ) && ( gameflag[132] == 0 ) )		// ä¸Š
 		  || ( ( replay_load_key[2] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				muki = 180;
 			}
-			else if ( ( ( IsPressKey( gameflag[1] ) ) && ( gameflag[132] == 0 ) )	// ‰º
+			else if ( ( ( IsPressKey( gameflag[1] ) ) && ( gameflag[132] == 0 ) )	// ä¸‹
 		  || ( ( replay_load_key[3] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				muki = 0;
 			}
 			
-			if ( ( ( IsPressKey( gameflag[2] ) ) && ( gameflag[132] == 0 ) )		// ¶
+			if ( ( ( IsPressKey( gameflag[2] ) ) && ( gameflag[132] == 0 ) )		// å·¦
 		  || ( ( replay_load_key[0] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				if ( muki == 0 )
@@ -946,7 +837,7 @@ void act_keys( void )
 					muki = 90;
 				}
 			}
-			else if ( ( ( IsPressKey( gameflag[3] ) ) && ( gameflag[132] == 0 ) )	// ‰E
+			else if ( ( ( IsPressKey( gameflag[3] ) ) && ( gameflag[132] == 0 ) )	// å³
 		  || ( ( replay_load_key[1] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				if ( muki == 0 )
@@ -963,9 +854,9 @@ void act_keys( void )
 				}
 			}
 			
-			if ( player[27] == muki )	/* ’Í‚ñ‚¾‚Æ‚«‚Ì“ü—Í•ûŒü‚ğ‰Ÿ‚µ‚Ä‚¢‚½ */
+			if ( player[27] == muki )	/* æ´ã‚“ã ã¨ãã®å…¥åŠ›æ–¹å‘ã‚’æŠ¼ã—ã¦ã„ãŸ */
 			{
-				muki = -1;	/* ˆÚ“®‚µ‚È‚¢ */
+				muki = -1;	/* ç§»å‹•ã—ãªã„ */
 			}
 			else 
 			{
@@ -977,28 +868,28 @@ void act_keys( void )
 		}
 		else
 		{
-			if ( ( ( IsPressKey( gameflag[2] ) ) && ( gameflag[132] == 0 ) )		// ¶
+			if ( ( ( IsPressKey( gameflag[2] ) ) && ( gameflag[132] == 0 ) )		// å·¦
 		  || ( ( replay_load_key[0] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				
-				player[3] = 1;	/* Œü‚« */
+				player[3] = 1;	/* å‘ã */
 				if ( player[2] == 0 )
 				{
-					player[10] = 0;	/* ƒAƒjƒ[ƒVƒ‡ƒ“ŠÔŠuƒtƒŒ[ƒ€İ’è */
-					player[11] = 0;	/* ƒAƒjƒ[ƒVƒ‡ƒ“ƒJƒEƒ“ƒ^ */
-					player[2] = 1;	/* •à‚« */
+					player[10] = 0;	/* ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³é–“éš”ãƒ•ãƒ¬ãƒ¼ãƒ è¨­å®š */
+					player[11] = 0;	/* ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚«ã‚¦ãƒ³ã‚¿ */
+					player[2] = 1;	/* æ­©ã */
 				}
 				else if ( player[2] == 1 )
 				{
-					player[0] = player[0] - 2;	/* ƒLƒƒƒ‰ƒNƒ^[ˆÚ“® */
+					player[0] = player[0] - 2;	/* ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ç§»å‹• */
 				}
 				else if ( player[2] == 21 )
 				{
-					player[0] = player[0] - 2;	/* ƒLƒƒƒ‰ƒNƒ^[ˆÚ“® */
+					player[0] = player[0] - 2;	/* ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ç§»å‹• */
 				}
 
 			}
-			else if ( ( ( IsPressKey( gameflag[3] ) ) && ( gameflag[132] == 0 ) )	// ‰E
+			else if ( ( ( IsPressKey( gameflag[3] ) ) && ( gameflag[132] == 0 ) )	// å³
 		  || ( ( replay_load_key[1] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				player[3] = 0;
@@ -1028,18 +919,18 @@ void act_keys( void )
 			}
 			
 			muki = -1;
-			if ( ( ( IsPressKey( gameflag[0] ) ) && ( gameflag[132] == 0 ) )		// ã
+			if ( ( ( IsPressKey( gameflag[0] ) ) && ( gameflag[132] == 0 ) )		// ä¸Š
 		  || ( ( replay_load_key[2] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				muki = 0;
 			}
-			else if ( ( ( IsPressKey( gameflag[1] ) ) && ( gameflag[132] == 0 ) )	// ‰º
+			else if ( ( ( IsPressKey( gameflag[1] ) ) && ( gameflag[132] == 0 ) )	// ä¸‹
 		  || ( ( replay_load_key[3] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				muki = 180;
 			}
 			
-			if ( ( ( IsPressKey( gameflag[2] ) ) && ( gameflag[132] == 0 ) )		// ¶
+			if ( ( ( IsPressKey( gameflag[2] ) ) && ( gameflag[132] == 0 ) )		// å·¦
 		  || ( ( replay_load_key[0] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				if ( muki == 0 )
@@ -1055,7 +946,7 @@ void act_keys( void )
 					muki = 270;
 				}
 			}
-			else if ( ( ( IsPressKey( gameflag[3] ) ) && ( gameflag[132] == 0 ) )	// ‰E
+			else if ( ( ( IsPressKey( gameflag[3] ) ) && ( gameflag[132] == 0 ) )	// å³
 		  || ( ( replay_load_key[1] == 1 ) && ( gameflag[132] == 1 ) ) )
 			{
 				if ( muki == 0 )
@@ -1083,7 +974,7 @@ void act_keys( void )
 		
 		muki2 = muki;
 		
-		if ( muki != -1 )	/* ƒL[‚ª“ü—Í‚³‚ê‚Ä‚¢‚é */
+		if ( muki != -1 )	/* ã‚­ãƒ¼ãŒå…¥åŠ›ã•ã‚Œã¦ã„ã‚‹ */
 		{
 			muki = muki - player[20];
 			if ( muki < 0 )
@@ -1112,7 +1003,7 @@ void act_keys( void )
 						{
 							break;
 						}
-						player[20] = player[20] + ( player[22] * 1 );	/* ƒAƒ“ƒJ[‚ÌˆÚ“® */
+						player[20] = player[20] + ( player[22] * 1 );	/* ã‚¢ãƒ³ã‚«ãƒ¼ã®ç§»å‹• */
 						if ( player[20] >= 360 )
 						{
 							player[20] = player[20] - 360;
@@ -1131,7 +1022,7 @@ void act_keys( void )
 						{
 							break;
 						}
-						kaiten = player[20] + ( player[22] * 1 );	/* ƒAƒ“ƒJ[‚ÌˆÚ“® */
+						kaiten = player[20] + ( player[22] * 1 );	/* ã‚¢ãƒ³ã‚«ãƒ¼ã®ç§»å‹• */
 						if ( kaiten >= 360 )
 						{
 							kaiten = kaiten - 360;
@@ -1140,8 +1031,8 @@ void act_keys( void )
 						{
 							kaiten = kaiten + 360;
 						}
-						px = ( ( funcSin( kaiten ) * ( player[21] * 1 ) ) >> 16 );	/* ƒAƒ“ƒJ[ˆÊ’u‚w */
-						py = ( ( funcCos( kaiten ) * ( player[21] * 1 ) ) >> 16 );	/* ƒAƒ“ƒJ[ˆÊ’u‚x */
+						px = ( ( funcSin( kaiten ) * ( player[21] * 1 ) ) >> 16 );	/* ã‚¢ãƒ³ã‚«ãƒ¼ä½ç½®ï¼¸ */
+						py = ( ( funcCos( kaiten ) * ( player[21] * 1 ) ) >> 16 );	/* ã‚¢ãƒ³ã‚«ãƒ¼ä½ç½®ï¼¹ */
 						if (
 						   ( ( ( map1_item_j( player[0] + px + 16, player[1] + py + 16  ) >= 100 )
 						    && ( map1_item_j( player[0] + px + 16, player[1] + py + 16  ) <= 119 ) )
@@ -1151,7 +1042,7 @@ void act_keys( void )
 						{
 //							break;
 						}
-						player[20] = player[20] + ( player[22] * 1 );	/* ƒAƒ“ƒJ[‚ÌˆÚ“® */
+						player[20] = player[20] + ( player[22] * 1 );	/* ã‚¢ãƒ³ã‚«ãƒ¼ã®ç§»å‹• */
 						if ( player[20] >= 360 )
 						{
 							player[20] = player[20] - 360;
@@ -1175,13 +1066,13 @@ void act_keys( void )
 			}
 		}
 		
-		player[30] = ( ( funcSin( player[20] ) * ( player[21] ) ) >> 16 );	/* ƒAƒ“ƒJ[ˆÊ’u‚w */
-		player[31] = ( ( funcCos( player[20] ) * ( player[21] ) ) >> 16 );	/* ƒAƒ“ƒJ[ˆÊ’u‚x */
+		player[30] = ( ( funcSin( player[20] ) * ( player[21] ) ) >> 16 );	/* ã‚¢ãƒ³ã‚«ãƒ¼ä½ç½®ï¼¸ */
+		player[31] = ( ( funcCos( player[20] ) * ( player[21] ) ) >> 16 );	/* ã‚¢ãƒ³ã‚«ãƒ¼ä½ç½®ï¼¹ */
 		
 
 		
 		
-		if ( player[28] == 1 )	/* ˆÚ“®° */
+		if ( player[28] == 1 )	/* ç§»å‹•åºŠ */
 		{
 			player[0] = player[0] + 2;
 		}
@@ -1190,7 +1081,7 @@ void act_keys( void )
 			player[0] = player[0] - 2;
 		}
 		
-		if ( player[29] > 0 )	/* ˆÚ“®° */
+		if ( player[29] > 0 )	/* ç§»å‹•åºŠ */
 		{
 			player[0] = player[0] + ( player[29] * 1 );
 			player[29] = player[29] - 1;
@@ -1200,7 +1091,7 @@ void act_keys( void )
 			player[0] = player[0] + ( player[29] * 1 );
 			player[29] = player[29] + 1;
 		}
-		/* ƒAƒ“ƒJ[‚«”ò‚Ñ */
+		/* ã‚¢ãƒ³ã‚«ãƒ¼å¹ãé£›ã³ */
 /*		
 		if ( player[34] > 0 )
 		{
@@ -1226,7 +1117,7 @@ void act_keys( void )
 		if ( ( ( IsPressKey( gameflag[0] ) ) && ( gameflag[132] == 0 ) )
 		  || ( ( replay_load_key[2] == 1 ) && ( gameflag[132] == 1 ) ) )
 		{
-			/* —§‚¿A•à‚« */
+			/* ç«‹ã¡ã€æ­©ã */
 			if ( ( player[2] == 0 ) || ( player[2] == 1 ) )
 			{
 				item_event( );
@@ -1237,11 +1128,11 @@ void act_keys( void )
 		{
 		}
 		
-		//	ƒXƒy[ƒXƒL[‚ª‰Ÿ‚³‚ê‚é
-		if ( ( ( IsPressKey( gameflag[4] ) )  && ( gameflag[132] == 0 ) ) 		/* ˆÚ“®‘¬“x’á‰º */
+		//	ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ãŒæŠ¼ã•ã‚Œã‚‹
+		if ( ( ( IsPressKey( gameflag[4] ) )  && ( gameflag[132] == 0 ) ) 		/* ç§»å‹•é€Ÿåº¦ä½ä¸‹ */
 		  || ( ( replay_load_key[4] == 1 ) && ( gameflag[132] == 1 ) ) )
 		{
-			if ( player[24] == 1 )	/* ƒAƒ“ƒJ[ó‘Ô‚©‚çƒWƒƒƒ“ƒv‚µ‚½ or ’nã */
+			if ( player[24] == 1 )	/* ã‚¢ãƒ³ã‚«ãƒ¼çŠ¶æ…‹ã‹ã‚‰ã‚¸ãƒ£ãƒ³ãƒ—ã—ãŸ or åœ°ä¸Š */
 			{
 			}
 			else 
@@ -1269,8 +1160,8 @@ void act_keys( void )
 						}
 					}
 
-					player[30] = ( ( funcSin( player[20] ) * ( player[21] ) ) >> 16 );	/* ƒAƒ“ƒJ[ˆÊ’u‚w */
-					player[31] = ( ( funcCos( player[20] ) * ( player[21] ) ) >> 16 );	/* ƒAƒ“ƒJ[ˆÊ’u‚x */
+					player[30] = ( ( funcSin( player[20] ) * ( player[21] ) ) >> 16 );	/* ã‚¢ãƒ³ã‚«ãƒ¼ä½ç½®ï¼¸ */
+					player[31] = ( ( funcCos( player[20] ) * ( player[21] ) ) >> 16 );	/* ã‚¢ãƒ³ã‚«ãƒ¼ä½ç½®ï¼¹ */
 /*
 					if (
 					   ( ( ( map1_item_j( player[0] + player[30] + 0, player[1] + player[31] + 0  ) >= 100 )
@@ -1300,13 +1191,13 @@ void act_keys( void )
 						    && ( map1_item_j( player[0] + player[30] + 16, player[1] + player[31] + 16  ) <= 218 ) ) )
 						   )
 						{
-							if   ( player[23] == 1 )	/* L‚Î‚µ‚Ä‚¢‚é */
+							if   ( player[23] == 1 )	/* ä¼¸ã°ã—ã¦ã„ã‚‹ */
 							{
 								if ( player[9] == 0 )
 								{
 									player[10] = 0;
 									player[11] = 0;
-									player[2] = 21;		/* ‹ó’† */
+									player[2] = 21;		/* ç©ºä¸­ */
 									player[13] = 0;
 									player[14] = -1;
 									px = ( player[0] + player[30] + 16 ) / 32;
@@ -1385,7 +1276,7 @@ void act_keys( void )
 									soundPlaySe( EN_SE_ATK1 );
 									p_shot_f2_set( player[32]  + 14, player[33]  + 14, 0 );
 								}
-								player[9] = 1;	/* ’Í‚ñ‚Å‚¢‚é */
+								player[9] = 1;	/* æ´ã‚“ã§ã„ã‚‹ */
 								break;
 							}
 						}
@@ -1395,8 +1286,8 @@ void act_keys( void )
 							{
 								if ( item[( ii * 10 ) + 0 ] == 1 )
 								{
-									/* ƒvƒŒƒCƒ„[‚Æ‚Ì“–‚½‚è”»’è */
-									if ( ( ( (item[1 + ( ii * 10 )] + 2 ) < ( player[0] + player[30] + 16 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+									/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
+									if ( ( ( (item[1 + ( ii * 10 )] + 2 ) < ( player[0] + player[30] + 16 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 										&& ( ( player[0] + player[30] + 16 ) < (item[1 + ( ii * 10 )] + 30 ) )
 										&& ( (item[2 + ( ii * 10 )]  + 2 ) < ( player[1] + player[31] + 16 ) )
 										&& ( ( player[1] + player[31] + 16 ) < ( item[2 + ( ii * 10 )] + 30 ) ) )
@@ -1407,14 +1298,14 @@ void act_keys( void )
 										  || ( item[( ii * 10 ) + 3 ] == 704 )
 										   )
 										{
-											if   ( player[23] == 1 )	/* L‚Î‚µ‚Ä‚¢‚é */
+											if   ( player[23] == 1 )	/* ä¼¸ã°ã—ã¦ã„ã‚‹ */
 											{
 												if ( player[9] == 0 )
 												{
-													player[37] = ii;		/* ƒAƒCƒeƒ€‚ğ’Í‚ñ‚Å‚¢‚é */
+													player[37] = ii;		/* ã‚¢ã‚¤ãƒ†ãƒ ã‚’æ´ã‚“ã§ã„ã‚‹ */
 													player[10] = 0;
 													player[11] = 0;
-													player[2] = 21;		/* ‹ó’† */
+													player[2] = 21;		/* ç©ºä¸­ */
 													player[13] = 0;
 													player[14] = -1;
 													
@@ -1494,7 +1385,7 @@ void act_keys( void )
 												soundPlaySe( EN_SE_ATK1 );
 													p_shot_f2_set( player[32] + 14, player[33] + 14, 0 );
 												}
-												player[9] = 1;	/* ’Í‚ñ‚Å‚¢‚é */
+												player[9] = 1;	/* æ´ã‚“ã§ã„ã‚‹ */
 												break;
 											}
 										}
@@ -1504,7 +1395,7 @@ void act_keys( void )
 						}
 	//						else 
 	//						{
-	//				//				player[9] = 0;	/* ’Í‚ñ‚Å‚¢‚é */
+	//				//				player[9] = 0;	/* æ´ã‚“ã§ã„ã‚‹ */
 	//						}
 					}
 
@@ -1525,13 +1416,13 @@ void act_keys( void )
 			}
 			player[23] = 0;
 			
-			if ( player[9] == 1 )	/* “G‚ğ’Í‚ñ‚Å‚¢‚éê‡ */
+			if ( player[9] == 1 )	/* æ•µã‚’æ´ã‚“ã§ã„ã‚‹å ´åˆ */
 			{
 				player[14] = -1;	/*  */
 				player[13] = 0;
 //				player[36] = player[20];
-//				player[34] = player[21] - 32; /* ƒAƒ“ƒJ[‚Á”ò‚ÑX */
-//				player[35] = player[21] - 32; /* ƒAƒ“ƒJ[‚Á”ò‚ÑY */
+//				player[34] = player[21] - 32; /* ã‚¢ãƒ³ã‚«ãƒ¼å¹ã£é£›ã³X */
+//				player[35] = player[21] - 32; /* ã‚¢ãƒ³ã‚«ãƒ¼å¹ã£é£›ã³Y */
 			}
 			player[9] = 0;	/*  */
 			player[37] = -1;
@@ -1541,15 +1432,15 @@ void act_keys( void )
 
 		
 		
-		//B‚ª‰Ÿ‚³‚ê‚é
+		//BãŒæŠ¼ã•ã‚Œã‚‹
 		if ( ( ( ( IsPushKey( gameflag[5] ) ) || IsPushKey( gameflag[5] ) ) && ( gameflag[132] == 0 ) )
 		  || ( ( replay_load_key[6] == 1 ) && ( gameflag[132] == 1 ) ) )
 		{
-			if ( ( player[2] != 11 ) && ( player[2] != 31 ) && ( player[14] == 10 ) )	/* ’nã‚ÅUŒ‚Aƒ_ƒ[ƒW‚¶‚á‚È‚¢ */
+			if ( ( player[2] != 11 ) && ( player[2] != 31 ) && ( player[14] == 10 ) )	/* åœ°ä¸Šã§æ”»æ’ƒã€ãƒ€ãƒ¡ãƒ¼ã‚¸ã˜ã‚ƒãªã„ */
 			{
 				Jump_counts++;
 				soundPlaySe( EN_SE_JUMP );
-				/* ƒAƒCƒeƒ€‚Éæ‚Á‚Ä‚¢‚È‚¢ê‡‚Í‚»‚±‚ªƒŠƒgƒ‰ƒCˆÊ’u */
+				/* ã‚¢ã‚¤ãƒ†ãƒ ã«ä¹—ã£ã¦ã„ãªã„å ´åˆã¯ãã“ãŒãƒªãƒˆãƒ©ã‚¤ä½ç½® */
 				if ( item_up( ) == -1 )
 				{
 					player[15] = player[0];
@@ -1557,7 +1448,7 @@ void act_keys( void )
 				}
 				player[10] = 0;
 				player[11] = 0;
-				player[2] = 21;	/* ‹ó’† */
+				player[2] = 21;	/* ç©ºä¸­ */
 				player[14] = 5;
 				player[13] = 0;
 				player[25] = 1;
@@ -1568,7 +1459,7 @@ void act_keys( void )
 			{
 				Jump_counts++;
 				soundPlaySe( EN_SE_JUMP );
-				/* ƒAƒCƒeƒ€‚Éæ‚Á‚Ä‚¢‚È‚¢ê‡‚Í‚»‚±‚ªƒŠƒgƒ‰ƒCˆÊ’u */
+				/* ã‚¢ã‚¤ãƒ†ãƒ ã«ä¹—ã£ã¦ã„ãªã„å ´åˆã¯ãã“ãŒãƒªãƒˆãƒ©ã‚¤ä½ç½® */
 				if ( item_up( ) == -1 )
 				{
 					player[15] = player[0];
@@ -1576,7 +1467,7 @@ void act_keys( void )
 				}
 				player[10] = 0;
 				player[11] = 0;
-				player[2] = 21;	/* ‹ó’† */
+				player[2] = 21;	/* ç©ºä¸­ */
 				player[14] = 5;
 				player[13] = 0;
 				player[25] = 1;
@@ -1598,7 +1489,7 @@ void act_keys( void )
 			}
 			else 
 			{
-				if ( ( player[14] > 0 ) && ( player[25] == 1 ) )	/* “r’†‚Å—‰º */
+				if ( ( player[14] > 0 ) && ( player[25] == 1 ) )	/* é€”ä¸­ã§è½ä¸‹ */
 				{
 //					player[14] = -1;
 				}
@@ -1613,14 +1504,14 @@ void act_keys( void )
 		Jump_counts = 99;
 	}
 	
-	/* 12ƒ{ƒ^ƒ“@‚©@‚b‚ª‰Ÿ‚³‚ê‚½ */
+	/* 12ãƒœã‚¿ãƒ³ã€€ã‹ã€€ï¼£ãŒæŠ¼ã•ã‚ŒãŸ */
 	if ( IsPushKey( gameflag[6] ) )
 	{
 		sn = 4;
 		demo[0] = 0;
 	}
 	
-	/* ƒXƒLƒ‹ƒVƒ‡[ƒgƒJƒbƒgƒEƒBƒ“ƒhƒE */
+	/* ã‚¹ã‚­ãƒ«ã‚·ãƒ§ãƒ¼ãƒˆã‚«ãƒƒãƒˆã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ */
 	if ( IsPushKey( gameflag[7] ) )
 	{
 	}
@@ -1654,12 +1545,12 @@ void act_keys( void )
 			}
 			player[19] = player[21];
 		}
-		if ( save_data[9] == 1 )	/* ƒeƒŒƒ|[ƒ^g—p•s‰Â */
+		if ( save_data[9] == 1 )	/* ãƒ†ãƒ¬ãƒãƒ¼ã‚¿ä½¿ç”¨ä¸å¯ */
 		{
 		}
 		else if ( ( item_up( ) != -1 ) )
 		{
-			/* ƒAƒCƒeƒ€‚Éæ‚Á‚Ä‚¢‚éê‡‚ÍƒXƒNƒ[ƒ‹‚µ‚È‚¢ */
+			/* ã‚¢ã‚¤ãƒ†ãƒ ã«ä¹—ã£ã¦ã„ã‚‹å ´åˆã¯ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã—ãªã„ */
 		}
 		else 
 		{
@@ -1699,7 +1590,7 @@ void act_keys( void )
 			}
 			player[19] = player[21];
 		}
-		if ( save_data[9] == 1 )	/* ƒeƒŒƒ|[ƒ^g—p•s‰Â */
+		if ( save_data[9] == 1 )	/* ãƒ†ãƒ¬ãƒãƒ¼ã‚¿ä½¿ç”¨ä¸å¯ */
 		{
 		}
 		else if ( ( item_up( ) != -1 ) )
@@ -1713,16 +1604,21 @@ void act_keys( void )
 				{
 					wait_scl( 3, map_data[7] );
 				}
+				// FIXME: present in 1.04
+				/*else if ( map_data[6] == 2 )
+				{
+					end_scl( map_data[7] );
+				}*/
 			}
 		}
 	}
-	if ( player[1] < -30 )	/* ‰æ–Ê‰º */
+	if ( player[1] < -30 )	/* ç”»é¢ä¸‹ */
 	{
 		cleaer_ankr( 1 );	/*  */
 	}
-	if ( player[1] <= 0 )	/* ‰æ–Ê‰º */
+	if ( player[1] <= 0 )	/* ç”»é¢ä¸‹ */
 	{
-		if ( save_data[9] == 1 )	/* ƒeƒŒƒ|[ƒ^g—p•s‰Â */
+		if ( save_data[9] == 1 )	/* ãƒ†ãƒ¬ãƒãƒ¼ã‚¿ä½¿ç”¨ä¸å¯ */
 		{
 		}
 		else 
@@ -1733,9 +1629,9 @@ void act_keys( void )
 			}
 		}
 	}
-	if ( player[1] >= 450 )	/* ‰æ–Êã */
+	if ( player[1] >= 450 )	/* ç”»é¢ä¸Š */
 	{
-		if ( save_data[9] == 1 )	/* ƒeƒŒƒ|[ƒ^g—p•s‰Â */
+		if ( save_data[9] == 1 )	/* ãƒ†ãƒ¬ãƒãƒ¼ã‚¿ä½¿ç”¨ä¸å¯ */
 		{
 		}
 		else 
@@ -1751,38 +1647,38 @@ void act_keys( void )
 
 void fram_set( )
 {
-	if ( player[2] == 0 )	/* ƒjƒ…[ƒgƒ‰ƒ‹ */
+	if ( player[2] == 0 )	/* ãƒ‹ãƒ¥ãƒ¼ãƒˆãƒ©ãƒ« */
 	{
 		player[12] = 20;
 	}
-	if ( player[2] == 1 )	/* •à‚« */
+	if ( player[2] == 1 )	/* æ­©ã */
 	{
 		player[12] = 5;
 	}
-	if ( player[2] == 11 )	/* UŒ‚ */
+	if ( player[2] == 11 )	/* æ”»æ’ƒ */
 	{
 		player[12] = 2;
 	}
-	if ( player[2] == 21 )	/* ‹ó’† */
+	if ( player[2] == 21 )	/* ç©ºä¸­ */
 	{
 		player[12] = 5;
 	}
-	if ( player[2] == 31 )	/* ‚â‚ç‚ê */
+	if ( player[2] == 31 )	/* ã‚„ã‚‰ã‚Œ */
 	{
 		player[12] = 3;
 	}
-	if ( player[2] == 33 )	/* ƒNƒŠƒA */
+	if ( player[2] == 33 )	/* ã‚¯ãƒªã‚¢ */
 	{
 		player[12] = 10;
 	}
-	if ( player[2] == 61 )	/* ãŒü‚« */
+	if ( player[2] == 61 )	/* ä¸Šå‘ã */
 	{
 		player[12] = 10;
 	}
 }
 
 
-/* ‚·‚¢’†‚Ìê‡‚ÍƒWƒƒƒ“ƒv—Í‘‰Á */
+/* ã™ã„ä¸­ã®å ´åˆã¯ã‚¸ãƒ£ãƒ³ãƒ—åŠ›å¢—åŠ  */
 void jmp_st( )
 {
 	Sint32 px1 ;
@@ -1792,7 +1688,7 @@ void jmp_st( )
 	px1 = ( player[0] + 10 ) / 32;
 	px2 = ( player[0] + 22 ) / 32;
 	py2 = ( 16 - ( ( player[1] + 32 + 28 ) / 32 ) );
-
+	/* æ°´ä¸­åˆ¤å®š */
 	if ( ( map1[ px1 + ( ( py2 ) * 20 ) ] == 319 ) 
 	  || ( map1[ px2 + ( ( py2 ) * 20 ) ] == 419 )  
 	  || ( map1[ px1 + ( ( py2 ) * 20 ) ] == 318 )  
@@ -1800,11 +1696,11 @@ void jmp_st( )
 	  || ( map1[ px1 + ( ( py2 ) * 20 ) ] == 719 )
 	  || ( map1[ px1 + ( ( py2 ) * 20 ) ] == 718 ) )
 	{
-		player[14] = player[14] + 1; 		/* ƒWƒƒƒ“ƒvƒtƒ‰ƒO */
+		player[14] = player[14] + 1; 		/* ã‚¸ãƒ£ãƒ³ãƒ—ãƒ•ãƒ©ã‚° */
 	}
 }
 
-/* ƒWƒƒƒ“ƒv‚xˆÊ’uŒvZ */
+/* ã‚¸ãƒ£ãƒ³ãƒ—ï¼¹ä½ç½®è¨ˆç®— */
 /* Renamed from jmp() because that function name could be problematic - Gameblabla */
 void g_jmp( )
 {
@@ -1822,11 +1718,11 @@ void g_jmp( )
 	
 	if ( player[14] == 10 ) 
 	{
-		/* ¡‰ñ‚ÌˆÊ’u */
+		/* ä»Šå›ã®ä½ç½® */
 		px1 = ( player[0] + 10 ) / 32;
 		px2 = ( player[0] + 21 ) / 32;
 		py = ( 16 - ( ( player[1] + 28 ) / 32 ) );
-		/* 100 ` 200‚Í’n–Ê */
+		/* 100 ã€œ 200ã¯åœ°é¢ */
 		if (
 		   ( ( !( ( map1[ px1 + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 119 ) ) )
 		  && ( !( ( map1[ px2 + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px2 + ( ( py ) * 20 ) ] <= 119 ) ) ) 
@@ -1835,7 +1731,7 @@ void g_jmp( )
 		   )
 		  || ( ( ( player[1] - 16 ) % 32 ) != 0 ) )
 			{
-			if ( item_up( ) != -1 )	/* ƒAƒCƒeƒ€‚Ìã‚Éæ‚Á‚Ä‚¢‚é */
+			if ( item_up( ) != -1 )	/* ã‚¢ã‚¤ãƒ†ãƒ ã®ä¸Šã«ä¹—ã£ã¦ã„ã‚‹ */
 			{
 				player[1] = item_up( ); 
 				return;
@@ -1846,12 +1742,12 @@ void g_jmp( )
 			{
 				player[10] = 0;
 				player[11] = 0;
-				player[2] = 21;		/* ‹ó’† */
+				player[2] = 21;		/* ç©ºä¸­ */
 			}
 			player[14] = -1;
 			player[13] = 0;
 			
-			if ( player[2] == 31 )	/* ƒ_ƒ[ƒW’† */
+			if ( player[2] == 31 )	/* ãƒ€ãƒ¡ãƒ¼ã‚¸ä¸­ */
 			{
 			}
 		}
@@ -1877,17 +1773,17 @@ void g_jmp( )
 		if ( player[14] < -4 )
 		{
 			player[14] = -4;
-			player[26]++;		/* ’…’nƒtƒFƒNƒg—p */
+			player[26]++;		/* ç€åœ°ãƒ•ã‚§ã‚¯ãƒˆç”¨ */
 		}
 		else 
 		{
 			player[26] = 0;
 		}
 		
-		/* ’n–Ê”»’è */
+		/* åœ°é¢åˆ¤å®š */
 	}
 	
-	/* ¡‰ñ‚ÌˆÊ’u */
+	/* ä»Šå›ã®ä½ç½® */
 	y1 = ( ( 0 - player[14] ) * ( 0 - player[14] ) * ( 0 - player[14] ) );
 //	player[1] = player[1] - ( y1 / 30 );
 
@@ -1895,7 +1791,7 @@ void g_jmp( )
 	px2 = ( player[0] + 21 ) / 32;
 	py = ( 16 - ( ( player[1] + 28 ) / 32 ) );
 //	py = ( 16 - ( ( player[1] ) / 32 ) );
-		/* …’†”»’è */
+		/* æ°´ä¸­åˆ¤å®š */
 	if ( ( map1[ px1 + ( ( py ) * 20 ) ] == 319 ) 
 	  || ( map1[ px2 + ( ( py ) * 20 ) ] == 419 )  
 	  || ( map1[ px1 + ( ( py ) * 20 ) ] == 318 )  
@@ -1903,7 +1799,7 @@ void g_jmp( )
 	  || ( map1[ px1 + ( ( py ) * 20 ) ] == 719 )
 	  || ( map1[ px1 + ( ( py ) * 20 ) ] == 718 ) )
 	{
-		if ( player[14] > 0 ) /* ã¸’† */
+		if ( player[14] > 0 ) /* ä¸Šæ˜‡ä¸­ */
 		{
 /*			player[1] = player[1] - ( y1 / 6 ); */
 			player[1] = player[1] - ( y1 / 18 );
@@ -1924,9 +1820,9 @@ void g_jmp( )
 	}
 	py3 = ( 16 - ( ( player[1] + 32 + 32 + 16 ) / 32 ) );
 
-	if ( player[14] <= 0 )													/* ã‚è’†‚Í”»’è‚µ‚È‚¢ */
+	if ( player[14] <= 0 )													/* ä¸Šã‚Šä¸­ã¯åˆ¤å®šã—ãªã„ */
 	{
-		/* ’n–Ê”»’è */
+		/* åœ°é¢åˆ¤å®š */
 		if ( ( ( map1[ px1 + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 119 ) )
 		  || ( ( map1[ px1 + ( ( py ) * 20 ) ] >= 200 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 219 ) ) 
 		  || ( ( map1[ px2 + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px2 + ( ( py ) * 20 ) ] <= 119 ) ) 
@@ -1936,14 +1832,14 @@ void g_jmp( )
 			{ 
 				soundPlaySe( EN_SE_LANDING );
 			}
-			if ( ( player[2] != 31 ) && ( player[2] != 32 ) )	/* ƒ_ƒ[ƒW’†‚¶‚á‚È‚¢ */
+			if ( ( player[2] != 31 ) && ( player[2] != 32 ) )	/* ãƒ€ãƒ¡ãƒ¼ã‚¸ä¸­ã˜ã‚ƒãªã„ */
 			{
-				player[2] = 0;												/* ’…’n */
-				player[11] = 0;												/* d’¼‰ğœ */
+				player[2] = 0;												/* ç€åœ° */
+				player[11] = 0;												/* ç¡¬ç›´è§£é™¤ */
 				player[18] = 10;
 			}
 			player[1] = ( ( 16 - py ) * 32 ) - 16; 
-			/* ’…’n‚Ì‰Œ‚ğ¶¬ */
+			/* ç€åœ°æ™‚ã®ç…™ã‚’ç”Ÿæˆ */
 			if ( player[26] >= 2 )
 			{
 				p_jump_f_set( player[0], player[1] );
@@ -1952,13 +1848,13 @@ void g_jmp( )
 		}
 		else 
 		{
-			if ( item_up( ) != -1 )	/* ƒAƒCƒeƒ€‚Ìã‚Éæ‚Á‚Ä‚¢‚é */
+			if ( item_up( ) != -1 )	/* ã‚¢ã‚¤ãƒ†ãƒ ã®ä¸Šã«ä¹—ã£ã¦ã„ã‚‹ */
 			{
 				soundPlaySe( EN_SE_LANDING );
-				if ( ( player[2] != 31 ) && ( player[2] != 32 ) )	/* ƒ_ƒ[ƒW’†‚¶‚á‚È‚¢ */
+				if ( ( player[2] != 31 ) && ( player[2] != 32 ) )	/* ãƒ€ãƒ¡ãƒ¼ã‚¸ä¸­ã˜ã‚ƒãªã„ */
 				{
-					player[2] = 0;												/* ’…’n */
-					player[11] = 0;												/* d’¼‰ğœ */
+					player[2] = 0;												/* ç€åœ° */
+					player[11] = 0;												/* ç¡¬ç›´è§£é™¤ */
 				}
 				player[1] = item_up( ); 
 				player[14] = 10;
@@ -1966,9 +1862,9 @@ void g_jmp( )
 			}
 		}
 	}
-	else		/* ã¸’† */
+	else		/* ä¸Šæ˜‡ä¸­ */
 	{
-		/* ’n–Ê”»’è */
+		/* åœ°é¢åˆ¤å®š */
 		if ( ( ( map1[ px1 + ( ( py3 ) * 20 ) ] >= 100 ) && ( map1[ px1 + ( ( py3 ) * 20 ) ] <= 119 ) )
 		  || ( ( map1[ px1 + ( ( py3 ) * 20 ) ] >= 200 ) && ( map1[ px1 + ( ( py3 ) * 20 ) ] <= 219 ) )
 		  || ( ( map1[ px2 + ( ( py3 ) * 20 ) ] >= 100 ) && ( map1[ px2 + ( ( py3 ) * 20 ) ] <= 119 ) )
@@ -1980,7 +1876,7 @@ void g_jmp( )
 		}
 		else 
 		{
-			if ( item_up2( ) != -1 )	/* ƒAƒCƒeƒ€‚É“ª‚ª‚Ô‚Â‚©‚é */
+			if ( item_up2( ) != -1 )	/* ã‚¢ã‚¤ãƒ†ãƒ ã«é ­ãŒã¶ã¤ã‹ã‚‹ */
 			{
 				player[1] = item_up2( ); 
 				player[13] = 0;
@@ -1991,7 +1887,7 @@ void g_jmp( )
 	}
 	if ( player[1] <= -32 )
 	{
-		if ( map_data[2] == 0 )	/* ƒXƒNƒ[ƒ‹‚µ‚È‚¢ê‡‚Íƒ_ƒ[ƒW */
+		if ( map_data[2] == 0 )	/* ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã—ãªã„å ´åˆã¯ãƒ€ãƒ¡ãƒ¼ã‚¸ */
 		{
 			if ( player[8] > 0 )
 			{ 
@@ -2029,16 +1925,16 @@ void idou_l( Sint32 ankr_flag )
 	Sint32 i;
 
 
-	/* ¡‰ñ‚ÌˆÊ’u */
+	/* ä»Šå›ã®ä½ç½® */
 	px = ( player[0] + 10 + player[29] ) / 32;
 	py1 = ( 16 - ( ( player[1] + 49 + 16  ) / 32 ) );
 	py2 = ( 16 - ( ( player[1] + 52 ) / 32 ) );
-	if ( py2 <= 0 )	/* ‰æ–ÊŠO‚Íˆê”Ôã‚Å”»’è */
+	if ( py2 <= 0 )	/* ç”»é¢å¤–ã¯ä¸€ç•ªä¸Šã§åˆ¤å®š */
 	{
 		py2 = 1;
 	}
 
-	/* 502‚Í‚µ‚²ã@501‚Í‚µ‚²’† */
+	/* 502ã¯ã—ã”ä¸Šã€€501ã¯ã—ã”ä¸­ */
 	if ( ( ( map1[ px + ( ( py1 ) * 20 ) ] >= 100 ) && ( map1[ px + ( ( py1 ) * 20 ) ] <= 299 ) )
 	  || ( ( map1[ px + ( ( py2 ) * 20 ) ] >= 100 ) && ( map1[ px + ( ( py2 ) * 20 ) ] <= 299 ) ) )
 	{
@@ -2057,13 +1953,13 @@ void idou_l( Sint32 ankr_flag )
 	{
 		if ( item[( i * 10 ) + 0 ] == 1 )
 		{
-			/* ƒvƒŒƒCƒ„[‚Æ‚Ì“–‚½‚è”»’è */
-			if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+			/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
+			if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 				&& ( (player[0] + 10 + player[29] ) < (item[1 + ( i * 10 )] + 32 ) )
 				&& ( (item[2 + ( i * 10 )] ) < (player[1] + 32 ) )
 				&& ( (player[1] + 5 ) < ( item[2 + ( i * 10 )] + 32 ) ) ) )
 			{
-				if ( ( ( item[( i * 10 ) + 3 ] >= 500 ) && ( item[( i * 10 ) + 3 ] <= 620 ) ) /* ˆÚ“®•s‰ÂƒAƒCƒeƒ€ */
+				if ( ( ( item[( i * 10 ) + 3 ] >= 500 ) && ( item[( i * 10 ) + 3 ] <= 620 ) ) /* ç§»å‹•ä¸å¯ã‚¢ã‚¤ãƒ†ãƒ  */
 				    || ( item[( i * 10 ) + 3 ] == 7 ) )
 				{
 					cleaer_ankr( ankr_flag );
@@ -2077,7 +1973,7 @@ void idou_l( Sint32 ankr_flag )
 	}
 
 }
-/* ©•ª‚Ì¶‰E‚ÉˆÚ“®‰Â”\‚©H */
+/* è‡ªåˆ†ã®å·¦å³ã«ç§»å‹•å¯èƒ½ã‹ï¼Ÿ */
 void idou_r( Sint32 ankr_flag )
 {
 	Sint32 px ;
@@ -2086,16 +1982,16 @@ void idou_r( Sint32 ankr_flag )
 
 	Sint32 i;
 
-	/* ¡‰ñ‚ÌˆÊ’u */
+	/* ä»Šå›ã®ä½ç½® */
 	px = ( player[0] + 21 + player[29]  ) / 32;
 	py1 = ( 16 - ( ( player[1] + 49 + 16 ) / 32 ) );
 	py2 = ( 16 - ( ( player[1] + 52 ) / 32 ) );
-	if ( py2 <= 0 )	/* ‰æ–ÊŠO‚Íˆê”Ôã‚Å”»’è */
+	if ( py2 <= 0 )	/* ç”»é¢å¤–ã¯ä¸€ç•ªä¸Šã§åˆ¤å®š */
 	{
 		py2 = 1;
 	}
 
-	/* 502‚Í‚µ‚²ã@501‚Í‚µ‚²’† */
+	/* 502ã¯ã—ã”ä¸Šã€€501ã¯ã—ã”ä¸­ */
 	if ( ( ( map1[ px + ( ( py1 ) * 20 ) ] >= 100 ) && ( map1[ px + ( ( py1 ) * 20 ) ] <= 299 ) )
 	  || ( ( map1[ px + ( ( py2 ) * 20 ) ] >= 100 ) && ( map1[ px + ( ( py2 ) * 20 ) ] <= 299 ) ) )
 	{
@@ -2112,13 +2008,13 @@ void idou_r( Sint32 ankr_flag )
 	{
 		if ( item[( i * 10 ) + 0 ] == 1 )
 		{
-			/* ƒvƒŒƒCƒ„[‚Æ‚Ì“–‚½‚è”»’è */
-			if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 + player[29] ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+			/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
+			if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 + player[29] ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 				&& ( (player[0] + 10 ) < (item[1 + ( i * 10 )] + 32 ) )
 				&& ( (item[2 + ( i * 10 )] ) < (player[1] + 32 ) )
 				&& ( (player[1] + 5 ) < ( item[2 + ( i * 10 )] + 32 ) ) ) )
 			{
-				if ( ( ( item[( i * 10 ) + 3 ] >= 500 ) && ( item[( i * 10 ) + 3 ] <= 620 ) ) /* ˆÚ“®•s‰ÂƒAƒCƒeƒ€ */
+				if ( ( ( item[( i * 10 ) + 3 ] >= 500 ) && ( item[( i * 10 ) + 3 ] <= 620 ) ) /* ç§»å‹•ä¸å¯ã‚¢ã‚¤ãƒ†ãƒ  */
 				    || ( item[( i * 10 ) + 3 ] == 7 ) )
 				{
 					cleaer_ankr( ankr_flag );
@@ -2149,15 +2045,15 @@ void cleaer_ankr( Sint32 ankr_flag )
 void act_drow( void )
 {
 	//-------------------------------------------------------------
-	//•Ï”éŒ¾
+	//å¤‰æ•°å®£è¨€
 	//-------------------------------------------------------------
 
-	//”wŒiƒNƒŠƒA
-	ClearSecondary();
+	//èƒŒæ™¯ã‚¯ãƒªã‚¢
+	ClearScreen();
 
-	switch( sn )							/* sn‚É‚æ‚Á‚Ä•`‰æ‚·‚é‚à‚Ì‚ğ•Ï‚¦‚é */
+	switch( sn )							/* snã«ã‚ˆã£ã¦æç”»ã™ã‚‹ã‚‚ã®ã‚’å¤‰ãˆã‚‹ */
 	{
-	case 0:		//ŠJnƒfƒ‚
+	case 0:		//é–‹å§‹ãƒ‡ãƒ¢
 		bakdisp1( );
 		playerdisp( );
 		enm_disp( );
@@ -2166,7 +2062,7 @@ void act_drow( void )
 		debugdisp( );
 		//-----------------------------------------------------------------------------------
 		break;
-	case 1 :		//ƒAƒNƒVƒ‡ƒ“
+	case 1 :		//ã‚¢ã‚¯ã‚·ãƒ§ãƒ³
 		act_keys( );
 		bakdisp1( );
 		item_disp( );
@@ -2181,13 +2077,13 @@ void act_drow( void )
 		p_shot_f2_disp( );
 		p_shot_f_disp( );
 		minimap_disp( );
-		snack_counter_disp( ); // ‚¨‚â‚ÂƒJƒEƒ“ƒ^
+		snack_counter_disp( ); // ãŠã‚„ã¤ã‚«ã‚¦ãƒ³ã‚¿
 		mapdisp( );
-		debugdisp( );		/* ƒfƒoƒbƒOî•ñ */
+		debugdisp( );		/* ãƒ‡ãƒãƒƒã‚°æƒ…å ± */
 		stage_endj( );
 		//-----------------------------------------------------------------------------------
 		break;
-	case 2 :		//ƒNƒŠƒAƒfƒ‚
+	case 2 :		//ã‚¯ãƒªã‚¢ãƒ‡ãƒ¢
 		bakdisp1( );
 		item_disp( );
 //			enm_disp( );
@@ -2200,12 +2096,12 @@ void act_drow( void )
 		p_shot_f2_disp( );
 		stage_claer( );
 		minimap_disp( );
-		snack_counter_disp( ); // ‚¨‚â‚ÂƒJƒEƒ“ƒ^
+		snack_counter_disp( ); // ãŠã‚„ã¤ã‚«ã‚¦ãƒ³ã‚¿
 		mapdisp( );
 		debugdisp( );
 		//-----------------------------------------------------------------------------------
 		break;
-	case 3 :		//ƒQ[ƒ€ƒI[ƒo[
+	case 3 :		//ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼
 		bakdisp1( );
 		item_disp( );
 		enm_disp( );
@@ -2217,13 +2113,13 @@ void act_drow( void )
 		bakdisp2( );
 		p_shot_f2_disp( );
 		minimap_disp( );
-		snack_counter_disp( ); // ‚¨‚â‚ÂƒJƒEƒ“ƒ^
+		snack_counter_disp( ); // ãŠã‚„ã¤ã‚«ã‚¦ãƒ³ã‚¿
 		mapdisp( );
 		stage_end( );
 		debugdisp( );
 		//-----------------------------------------------------------------------------------
 		break;
-	case 4 :		//ƒAƒCƒeƒ€
+	case 4 :		//ã‚¢ã‚¤ãƒ†ãƒ 
 		window_keys( );
 		bakdisp1( );
 		item_disp( );
@@ -2238,18 +2134,18 @@ void act_drow( void )
 		p_shot_f2_disp( );
 		p_shot_f_disp( );
 		minimap_disp( );
-		snack_counter_disp( ); // ‚¨‚â‚ÂƒJƒEƒ“ƒ^
+		snack_counter_disp( ); // ãŠã‚„ã¤ã‚«ã‚¦ãƒ³ã‚¿
 		mapdisp( );
 		window_disp( );
 		debugdisp( );
 		//-----------------------------------------------------------------------------------
 		break;
-	case 5 :		//ƒCƒxƒ“ƒg
+	case 5 :		//ã‚¤ãƒ™ãƒ³ãƒˆ
 		//-----------------------------------------------------------------------------------
 		break;
-	default :	//	‚Ç‚ÌğŒ‚É‚à–‚½‚È‚¢ê‡
+	default :	//	ã©ã®æ¡ä»¶ã«ã‚‚æº€ãŸãªã„å ´åˆ
 		
-		/* ‰æ–ÊØ‚è‘Ö‚¦‚Ì•\¦‘Îô */
+		/* ç”»é¢åˆ‡ã‚Šæ›¿ãˆæ™‚ã®è¡¨ç¤ºå¯¾ç­– */
 		player[0] = next_px;
 		player[1] = next_py;
 		
@@ -2257,11 +2153,19 @@ void act_drow( void )
 		break;
 	}
 
-	RefreshScreen( g_screen );	
+        // FIXME: present in 1.04
+	/*if ( gameflag[61] == 0 )
+	{
+		Blt( 109 , -160, -120 );
+	}*/
+
+	//ç”»é¢ã®æç”»
+	RefreshScreen( );	// æç”»
+	//ã‚­ãƒ¼å…¥åŠ›æ¤œæŸ»
 	KeyInput();				
 }
 
-/* ˆêƒtƒ@ƒCƒ‹•Û‘¶ */
+/* ä¸€æ™‚ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜ */
 void save_file_w( )
 {
 	Sint32 i;
@@ -2278,21 +2182,6 @@ void save_file_w( )
 
 	sprintf(path_work, "save/work.sav");
 	sprintf(path_item, "save/item_wk.sav");
-#elif defined(DREAMCAST)
-
-	sprintf(path_config, "/ram/config");
-	sprintf(path_folder, "/ram");
-
-	sprintf(path_work, "/ram/work.sav");
-	sprintf(path_item, "/ram/item_wk.sav");
-	
-#elif defined(_TINSPIRE)
-	sprintf(path_config, "./save/config.tns");
-	sprintf(path_folder, "./save");
-
-	sprintf(path_work, "./save/work.sav.tns");
-	sprintf(path_item, "./save/item_wk.sav.tns");
-	
 #elif defined(RELATIVE_PATH)
 	sprintf(path_config, "config.dat");
 	sprintf(path_work, "work.sav");
@@ -2307,12 +2196,8 @@ void save_file_w( )
 	
 #ifdef MINGW
 	mkdir(path_folder);
-#elif defined(_TINSPIRE)
-	mkdir(path_folder, 0755);	
 #elif defined(RELATIVE_PATH)
 	
-#elif defined(DREAMCAST)
-
 #else	
 	mkdir(path_folder, 0755);
 #endif
@@ -2321,34 +2206,30 @@ void save_file_w( )
 	SaveGameFlag(path_config);
 	
 	ResetGameFlag2();
-	save_data[5] = player[8];
+	save_data[5] = player[8];/* HP */
 	save_data[2] = stage;
 	
-	save_data[0] = player[0];	
-	save_data[1] = player[1];
-	save_data[4] = player[3];
-	for ( i = 0; i < 400; i++ )
+	save_data[0] = player[0];	/* ï¼¸ */
+	save_data[1] = player[1];	/* ï¼¹ */
+	save_data[4] = player[3];	/* å‘ã */
+	for ( i = 0; i < 400; i++ ) // FIXME: was 512 in 1.04
 	{
 		gameflag2[i] = save_data[i];
 	}
 	SaveGameFlag2(path_work);
-	/*#ifdef DREAMCAST
-	DC_SaveVMU(path_work, "gan_work.sav", "WORK");
-	#endif*/
+
+	/* ã‚¢ã‚¤ãƒ†ãƒ å–å¾—æƒ…å ± */
 	ResetGameFlag2();				
 	for ( i = 0; i < 500; i++ )
 	{
 		gameflag2[i] = item_wk[i];
 	}
 	SaveGameFlag2(path_item);
-	/*#ifdef DREAMCAST
-	DC_SaveVMU(path_work, "gan_item.sav", "ITEM");
-	#endif*/
 }
 
 
 /**********************************/
-/* ƒvƒŒƒCƒ„[‚Ìó‘ÔŒˆ’èˆ—       */
+/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®çŠ¶æ…‹æ±ºå®šå‡¦ç†       */
 /**********************************/
 
 /* Player sprite - Displayed according to the screen scrolling - Gameblabla */
@@ -2368,28 +2249,28 @@ void playerdisp( )
 		if ( player[11] >= 8 )
 		{
 			player[11] = 0;
-			if ( player[2] == 11 )	/* UŒ‚I—¹ */
+			if ( player[2] == 11 )	/* æ”»æ’ƒçµ‚äº† */
 			{
 				player[2] = 0;
-				if ( player[14] != 10 )	/* ‹ó’† */
+				if ( player[14] != 10 )	/* ç©ºä¸­ */
 				{
 					player[2] = 21;
 				}
 			}
-			if ( player[2] == 31 )	/* ƒ_ƒ[ƒW */
+			if ( player[2] == 31 )	/* ãƒ€ãƒ¡ãƒ¼ã‚¸ */
 			{
 				player[2] = 0;
-				if ( player[14] != 10 )	/* ‹ó’† */
+				if ( player[14] != 10 )	/* ç©ºä¸­ */
 				{
 					player[2] = 21;
 				}
 			}
-			if ( player[2] == 32 )	/* ƒ_ƒEƒ“ƒQ[ƒ€ƒI[ƒo[ */
+			if ( player[2] == 32 )	/* ãƒ€ã‚¦ãƒ³ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼ */
 			{
 				player[2] = 32;
 				player[11] = 7;
 			}
-			if ( player[2] == 33 )	/* ƒNƒŠƒA */
+			if ( player[2] == 33 )	/* ã‚¯ãƒªã‚¢ */
 			{
 				player[2] = 33;
 				player[11] = 7;
@@ -2434,14 +2315,14 @@ void playerdisp( )
 			player[4] = 0;
 			player[5] = 7;
 			player[11] = 8;
-			if ( player[28] == 1 )	/* ˆÚ“®° */
+			if ( player[28] == 1 )	/* ç§»å‹•åºŠ */
 			{
 				player[3] = 0;
 				player[4] = 1;
 				player[5] = 2;
 				player[11] = 0;
 			}
-			if ( player[28] == 2 )	/* ˆÚ“®° */
+			if ( player[28] == 2 )	/* ç§»å‹•åºŠ */
 			{
 				player[3] = 1;
 				player[4] = 1;
@@ -2456,20 +2337,20 @@ void playerdisp( )
 				player[11] = 0;
 			}
 		}
-		if ( player[28] == 1 )	/* ˆÚ“®° */
+		if ( player[28] == 1 )	/* ç§»å‹•åºŠ */
 		{
 			player[3] = 0;
 			player[4] = 1;
 			player[5] = 2;
 		}
-		if ( player[28] == 2 )	/* ˆÚ“®° */
+		if ( player[28] == 2 )	/* ç§»å‹•åºŠ */
 		{
 			player[3] = 1;
 			player[4] = 1;
 			player[5] = 2;
 		}
 	}
-	if ( player[18] > 0 )	/* ’…’nƒ‚[ƒVƒ‡ƒ“•\¦ */
+	if ( player[18] > 0 )	/* ç€åœ°ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³è¡¨ç¤º */
 	{
 		player[18]--;
 	}
@@ -2482,17 +2363,17 @@ void playerdisp( )
 	}
 
 	
-	if ( player[2] == 1 )		/* •à‚« */
+	if ( player[2] == 1 )		/* æ­©ã */
 	{
 		player[4] = 0;
 		player[5] = 1;
-		if ( player[28] == 1 )	/* ˆÚ“®° */
+		if ( player[28] == 1 )	/* ç§»å‹•åºŠ */
 		{
 			player[3] = 0;
 			player[4] = 1;
 			player[5] = 2;
 		}
-		if ( player[28] == 2 )	/* ˆÚ“®° */
+		if ( player[28] == 2 )	/* ç§»å‹•åºŠ */
 		{
 			player[3] = 1;
 			player[4] = 1;
@@ -2508,30 +2389,30 @@ void playerdisp( )
 	{
 		player[4] = 0;
 		player[5] = 2;
-		if ( player[14] < 0 )	/* —‚¿‚Ä‚é */
+		if ( player[14] < 0 )	/* è½ã¡ã¦ã‚‹ */
 		{
 			player[5] = 7;
 		}
 	}
-	if ( player[2] == 31 )	/* ƒ_ƒ[ƒW */
+	if ( player[2] == 31 )	/* ãƒ€ãƒ¡ãƒ¼ã‚¸ */
 	{
 		player[4] = 0;
 		player[5] = 4;
 
 	}
-	if ( player[2] == 32 )	/* ƒQ[ƒ€ƒI[ƒo[ */
+	if ( player[2] == 32 )	/* ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼ */
 	{
 		player[4] = 1;
 		player[5] = 0;
 
 	}
-	if ( player[2] == 33 )	/* ƒNƒŠƒA */
+	if ( player[2] == 33 )	/* ã‚¯ãƒªã‚¢ */
 	{
 		player[4] = 0;
 		player[5] = 8;
 
 	}
-	if ( player[2] == 61 )	/* ãŒü‚« */
+	if ( player[2] == 61 )	/* ä¸Šå‘ã */
 	{
 		player[4] = 0;
 		player[5] = 0;
@@ -2545,7 +2426,7 @@ void playerdisp( )
 		player[5] = 2;
 	}
 	
-	/* ƒAƒ“ƒJ[ */
+	/* ã‚¢ãƒ³ã‚«ãƒ¼ */
 /*
 	player[20]
 	player[21]
@@ -2561,7 +2442,7 @@ void playerdisp( )
 //	     0,
 //	     32,
 //	     32 );
-	/* Šp“x‚©‚ç•\¦ƒpƒ^[ƒ“‚ğæ“¾ */
+	/* è§’åº¦ã‹ã‚‰è¡¨ç¤ºãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’å–å¾— */
 	arm_muki = ( ( player[20] + 11 ) * 100 ) / ( ( 360 * 100 ) / 16 ) ;
 	if ( arm_muki >= 16 )
 	{
@@ -2628,7 +2509,7 @@ void playerdisp( )
 	
 }
 //-------------------------------------------------------------
-//”wŒi•\¦
+//èƒŒæ™¯è¡¨ç¤º
 
 /* Scrolling map display - Gameblabla */
 void bakdisp1()
@@ -2683,7 +2564,7 @@ void bakdisp1()
 		}
 	}
 	
-	//‰æ–Ê”wŒi‚ğ‰æ–Ê‘S‘Ì‚É“]‘—
+	//ç”»é¢èƒŒæ™¯ã‚’ç”»é¢å…¨ä½“ã«è»¢é€
 	bak_cnt = bak_cnt + 1;
 	if ( bak_cnt >= 40 )
 	{
@@ -2716,8 +2597,10 @@ void bakdisp1()
 		d_y = 360 - player[1];
 	}
 
-	Blt( 113, 0, 0 );						/* ”wŒiƒXƒNƒ[ƒ‹‰‰o */
+	/* èƒŒæ™¯ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ON */
+	Blt( 113, 0, 0 );						/* èƒŒæ™¯ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«æ¼”å‡º */
 
+	/* åœ°é¢è¡¨ç¤º */
 	i = bak_cnt / 10;
 	for ( x = 0; x < 20; x++ )
 	{
@@ -2737,7 +2620,7 @@ void bakdisp1()
 				else 
 				{	
 
-					if ( b_y == 7 )			/* ”wŒiƒAƒjƒ[ƒVƒ‡ƒ“ */
+					if ( b_y == 7 )			/* èƒŒæ™¯ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ */
 					{
 						BltRect( 10, ( x * 32 ) - d_x, ( y * 32 ) - d_y - 32 + 16 , b_x * 32 , ( b_y + i ) * 32 ,32, 32 );
 					}
@@ -2775,7 +2658,7 @@ void bakdisp2( )
 					b_y = map1[ x + ( y * 20 ) ] / 100;
 					b_x = map1[ x + ( y * 20 ) ] % 100;
 					
-					if ( b_y == 7 )				/* ”wŒiƒAƒjƒ[ƒVƒ‡ƒ“ */
+					if ( b_y == 7 )				/* èƒŒæ™¯ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ */
 					{
 						BltRect( 10, ( x * 32 ) - d_x , ( y * 32 ) - d_y - 32 + 16, b_x * 32 , ( b_y + i ) * 32 ,32, 32 );
 					}
@@ -2786,7 +2669,7 @@ void bakdisp2( )
 					
 					b_y = map2[ x + ( y * 20 ) ] / 100;
 					b_x = map2[ x + ( y * 20 ) ] % 100;
-					if ( b_y == 7 )				/* ”wŒiƒAƒjƒ[ƒVƒ‡ƒ“ */
+					if ( b_y == 7 )				/* èƒŒæ™¯ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ */
 					{
 						BltRect( 11, ( x * 32 ) - d_x , ( y * 32 ) - d_y - 32 + 16 , b_x * 32 , ( b_y + i ) * 32 ,32, 32 );
 					}
@@ -2799,7 +2682,7 @@ void bakdisp2( )
 				{
 					b_y = map2[ x + ( y * 20 ) ] / 100;
 					b_x = map2[ x + ( y * 20 ) ] % 100;
-					if ( b_y == 7 )				/* ”wŒiƒAƒjƒ[ƒVƒ‡ƒ“ */
+					if ( b_y == 7 )				/* èƒŒæ™¯ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ */
 					{
 						BltRect( 11, ( x * 32 ) - d_x , ( y * 32 ) - d_y - 32 + 16 , b_x * 32 , ( b_y + i ) * 32 ,32, 32 );
 					}
@@ -2820,12 +2703,12 @@ void bak_make( )
 
 
 
-/* ‚v‚`‚h‚s‚Â‚«ƒXƒNƒ[ƒ‹ */
+/* ï¼·ï¼¡ï¼©ï¼´ã¤ãã‚¹ã‚¯ãƒ­ãƒ¼ãƒ« */
 void wait_scl( Sint32 type, Sint32 d_num )
 {
 /*  
-	0:ã	1:‰º	2:¶	3:‰E
-	‚æ‚İ‚±‚Şƒtƒ@ƒCƒ‹‚m‚n
+	0:ä¸Š	1:ä¸‹	2:å·¦	3:å³
+	ã‚ˆã¿ã“ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ï¼®ï¼¯
 */
 	Sint32 i;
 	Sint32 x;
@@ -2833,14 +2716,14 @@ void wait_scl( Sint32 type, Sint32 d_num )
 
 	screen_BackupPlane( );
 
-	/* ƒoƒbƒtƒ@ƒNƒŠƒA */
+	/* ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒªã‚¢ */
 	for ( i = 0; i < 100; i++ )
 	{
-		p_ef[i * 5] = 0;						/* ‘¶İ */
+		p_ef[i * 5] = 0;						/* å­˜åœ¨ */
 	}
 	for ( i = 0; i < 40; i++ )
 	{
-		pmshot[i * 20 + 2] = 0;						/* ‘¶İ */
+		pmshot[i * 20 + 2] = 0;						/* å­˜åœ¨ */
 	}
 	for ( i = 0; i < 10; i++ )
 	{
@@ -2850,22 +2733,22 @@ void wait_scl( Sint32 type, Sint32 d_num )
 	{
 		pshotf[i * 10 + 0] = 0 ;	
 	}
-	/* ƒoƒbƒtƒ@ƒNƒŠƒA */
+	/* ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒªã‚¢ */
 	for ( i = 0; i < 50; i++ )
 	{
 		item[i * 10 + 0] = 0 ;	
 	}
 	for ( i = 0; i < 20; i++ )
 	{
-		enemy[i * 20 + 0] = 0 ;					/* ‘¶İ‚µ‚Ä‚È‚¢ */
+		enemy[i * 20 + 0] = 0 ;					/* å­˜åœ¨ã—ã¦ãªã„ */
 	}
 	for ( i = 0; i < 20; i++ )
 	{
-		mgc_e[i * 10 + 0] = 0 ;					/* ‘¶İ‚µ‚Ä‚È‚¢ */
+		mgc_e[i * 10 + 0] = 0 ;					/* å­˜åœ¨ã—ã¦ãªã„ */
 	}
 	for ( i = 0; i < 20; i++ )
 	{
-		kane[i * 10 + 0] = 0 ;					/* ‘¶İ‚µ‚Ä‚È‚¢ */
+		kane[i * 10 + 0] = 0 ;					/* å­˜åœ¨ã—ã¦ãªã„ */
 	}
 
 	ResetGameFlag2( );
@@ -2888,7 +2771,7 @@ void wait_scl( Sint32 type, Sint32 d_num )
 		
 		if ( ( i == 0 ) || ( map_data[11 + i] != 0 ) )
 		{
-			LoadBitmap(string,110 + i , 0 );
+			LoadBitmap(string,110 + i , 0 );	//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 		}
 		else 
 		{
@@ -2896,6 +2779,7 @@ void wait_scl( Sint32 type, Sint32 d_num )
 		}
 	}
 
+	/* ãƒ¬ã‚¤ãƒ¤ãƒ¼ï¼’ */
 	ResetGameFlag2( );
 	sprintf(string,MAP_DATA_PATH "%d_%d.map", (int)stage , (int)2, (int)d_num );
 	if ( LoadGameFlag2(string) == 0 )
@@ -2908,6 +2792,7 @@ void wait_scl( Sint32 type, Sint32 d_num )
 	bak_make();
 
 
+	/* ã‚¢ã‚¤ãƒ†ãƒ é…ç½® */
 	ResetGameFlag2( );
 	sprintf(string,MAP_DATA_PATH "i%d_%d.map", (int)stage , (int)1, (int)d_num );
 	if ( LoadGameFlag2(string) == 0 )
@@ -2924,9 +2809,10 @@ void wait_scl( Sint32 type, Sint32 d_num )
 		}
 	}
 
-	ResetGameFlag2();
+	ResetGameFlag2();	/* ãƒ•ã‚¡ã‚¤ãƒ«ãªã— */
 	sprintf( string,MAP_DATA_PATH "e%d_%d.map", (int)stage , (int)1, (int)d_num );
-	LoadGameFlag2( string );
+	LoadGameFlag2( string );	/* æ•µé…ç½® */
+	/* æ•µé…ç½® */
 	for ( x = 0; x <= 19 ; x++ )
 	{
 		for ( y = 0; y <= 16 ; y++ )
@@ -2940,43 +2826,49 @@ void wait_scl( Sint32 type, Sint32 d_num )
 	
 	save_data[3] = d_num;
 	
+	/* ä¸Šã‚¹ã‚¯ãƒ­ãƒ¼ãƒ« */
 	if ( type == 0 )
 	{
 		player[1] = 0;
 	}
+	/* ä¸‹ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ« */
 	else if ( type == 1 )
 	{
 		player[1] = ( 480 - 32 - 16 );
 	}
+	/* æ¨ªã‚¹ã‚¯ãƒ­ãƒ¼ãƒ« */
 	else if ( type == 2 )
 	{
 		player[0] = ( 640 - 32 );
 	}
+	/* æ¨ªã‚¹ã‚¯ãƒ­ãƒ¼ãƒ« */
 	else if ( type == 3 )
 	{
 		player[0] = 0;
 	}
 
+	/* ãƒªãƒˆãƒ©ã‚¤å ´æ‰€è¨­å®š */
 	player[15] = player[0];
 	player[16] = player[1];
 
-	player[9] = 0;	
+	player[9] = 0;	/* æ´ã‚“ã§ã„ã‚‹æ•µã¯æ¶ˆãˆã‚‹ */
 }
 
-
+/* ï¼·ï¼¡ï¼©ï¼´ã¤ãã‚¹ã‚¯ãƒ­ãƒ¼ãƒ« */
 void wait_scl2( Sint32 d_num ,Sint32 init_x, Sint32 init_y )
 {
 	Sint32 i;
 	Sint32 x;
 	Sint32 y;
 
+	/* ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒªã‚¢ */
 	for ( i = 0; i < 100; i++ )
 	{
-		p_ef[i * 5] = 0;						/* ‘¶İ */
+		p_ef[i * 5] = 0;						/* å­˜åœ¨ */
 	}
 	for ( i = 0; i < 40; i++ )
 	{
-		pmshot[i * 20 + 2] = 0;						/* ‘¶İ */
+		pmshot[i * 20 + 2] = 0;						/* å­˜åœ¨ */
 	}
 	for ( i = 0; i < 10; i++ )
 	{
@@ -2986,22 +2878,22 @@ void wait_scl2( Sint32 d_num ,Sint32 init_x, Sint32 init_y )
 	{
 		pshotf[i * 10 + 0] = 0 ;	
 	}
-
+	/* ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒªã‚¢ */
 	for ( i = 0; i < 50; i++ )
 	{
 		item[i * 10 + 0] = 0 ;	
 	}
 	for ( i = 0; i < 20; i++ )
 	{
-		enemy[i * 20 + 0] = 0 ;					/* ‘¶İ‚µ‚Ä‚È‚¢ */
+		enemy[i * 20 + 0] = 0 ;					/* å­˜åœ¨ã—ã¦ãªã„ */
 	}
 	for ( i = 0; i < 20; i++ )
 	{
-		mgc_e[i * 10 + 0] = 0 ;
+		mgc_e[i * 10 + 0] = 0 ;					/* å­˜åœ¨ã—ã¦ãªã„ */
 	}
 	for ( i = 0; i < 20; i++ )
 	{
-		kane[i * 10 + 0] = 0 ;				
+		kane[i * 10 + 0] = 0 ;					/* å­˜åœ¨ã—ã¦ãªã„ */
 	}
 
 	ResetGameFlag2( );
@@ -3025,14 +2917,15 @@ void wait_scl2( Sint32 d_num ,Sint32 init_x, Sint32 init_y )
 		
 		if ( ( i == 0 ) || ( map_data[11 + i] != 0 ) )
 		{
-			LoadBitmap(string,110 + i , 0 );
+			LoadBitmap(string,110 + i , 0 );	//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 		}
 		else 
 		{
 			ReleaseBitmap(110 + i);
 		}
 	}
-	
+
+	/* ãƒ¬ã‚¤ãƒ¤ãƒ¼ï¼’ */
 	ResetGameFlag2( );
 	sprintf(string,MAP_DATA_PATH "%d_%d.map", (int)stage , (int)2, (int)d_num );
 	if ( LoadGameFlag2(string) == 0 )
@@ -3045,6 +2938,7 @@ void wait_scl2( Sint32 d_num ,Sint32 init_x, Sint32 init_y )
 	bak_make();
 
 
+	/* ã‚¢ã‚¤ãƒ†ãƒ é…ç½® */
 	ResetGameFlag2( );
 	sprintf(string,MAP_DATA_PATH "i%d_%d.map", (int)stage , (int)1, (int)d_num );
 	if ( LoadGameFlag2(string) == 0 )
@@ -3061,10 +2955,10 @@ void wait_scl2( Sint32 d_num ,Sint32 init_x, Sint32 init_y )
 		}
 	}
 
-	ResetGameFlag2();
+	ResetGameFlag2();	/* ãƒ•ã‚¡ã‚¤ãƒ«ãªã— */
 	sprintf( string,MAP_DATA_PATH "e%d_%d.map", (int)stage , (int)1, (int)d_num );
-	LoadGameFlag2( string );
-
+	LoadGameFlag2( string );	/* æ•µé…ç½® */
+	/* æ•µé…ç½® */
 	for ( x = 0; x <= 19 ; x++ )
 	{
 		for ( y = 0; y <= 16 ; y++ )
@@ -3081,14 +2975,18 @@ void wait_scl2( Sint32 d_num ,Sint32 init_x, Sint32 init_y )
 	player[0] = init_x;
 	player[1] = init_y;
 
-
+	/* ãƒªãƒˆãƒ©ã‚¤å ´æ‰€è¨­å®š */
 	player[15] = player[0];
 	player[16] = player[1];
 }
 
-
+/* ï¼·ï¼¡ï¼©ï¼´ã¤ãã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«(reloadå°‚ç”¨ã€æ•µã®å†é…ç½®ã‚’è¡Œã‚ãªã„) */
 void wait_scl3( )
 {
+/*  
+	0:ä¸Š	1:ä¸‹	2:å·¦	3:å³
+	ã‚ˆã¿ã“ã‚€ãƒ•ã‚¡ã‚¤ãƒ«ï¼®ï¼¯
+*/
 	Sint32 i;
 	Sint32 x;
 	Sint32 y;
@@ -3096,13 +2994,14 @@ void wait_scl3( )
 	
 	d_num = save_data[3];
 
+	/* ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒªã‚¢ */
 	for ( i = 0; i < 100; i++ )
 	{
-		p_ef[i * 10] = 0;						/* ‘¶İ */
+		p_ef[i * 10] = 0;						/* å­˜åœ¨ */
 	}
 	for ( i = 0; i < 40; i++ )
 	{
-		pmshot[i * 20 + 2] = 0;						/* ‘¶İ */
+		pmshot[i * 20 + 2] = 0;						/* å­˜åœ¨ */
 	}
 	for ( i = 0; i < 10; i++ )
 	{
@@ -3112,22 +3011,22 @@ void wait_scl3( )
 	{
 		pshotf[i * 10 + 0] = 0 ;	
 	}
-
+	/* ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒªã‚¢ */
 	for ( i = 0; i < 50; i++ )
 	{
 		item[i * 10 + 0] = 0 ;	
 	}
 	for ( i = 0; i < 20; i++ )
 	{
-		if ( enemy[0 + ( i * 20 )] == 1 )				
+		if ( enemy[0 + ( i * 20 )] == 1 )					/* å­˜åœ¨ã—ã¦ãªã„ */
 		{
-			enemy[1 + ( i * 20 )] = enemy[14 + ( i * 20 )] ;
-			enemy[2 + ( i * 20 )] = enemy[15 + ( i * 20 )] ;
+			enemy[1 + ( i * 20 )] = enemy[14 + ( i * 20 )] ;		/* å­˜åœ¨ã—ã¦ãªã„ */
+			enemy[2 + ( i * 20 )] = enemy[15 + ( i * 20 )] ;		/* å­˜åœ¨ã—ã¦ãªã„ */
 		}
 	}
 	for ( i = 0; i < 20; i++ )
 	{
-		mgc_e[i * 10 + 0] = 0 ;		
+		mgc_e[i * 10 + 0] = 0 ;					/* å­˜åœ¨ã—ã¦ãªã„ */
 	}
 
 	ResetGameFlag2( );
@@ -3150,7 +3049,7 @@ void wait_scl3( )
 		
 		if ( ( i == 0 ) || ( map_data[11 + i] != 0 ) )
 		{
-			LoadBitmap(string,110 + i , 0 );
+			LoadBitmap(string,110 + i , 0 );	//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 		}
 		else 
 		{
@@ -3158,6 +3057,7 @@ void wait_scl3( )
 		}
 	}
 	
+	/* ãƒ¬ã‚¤ãƒ¤ãƒ¼ï¼’ */
 	ResetGameFlag2( );
 	sprintf(string,MAP_DATA_PATH "%d_%d.map", (int)stage , (int)2, (int)d_num );
 	if ( LoadGameFlag2(string) == 0 )
@@ -3169,6 +3069,7 @@ void wait_scl3( )
 	}
 	bak_make();
 
+	/* ã‚¢ã‚¤ãƒ†ãƒ é…ç½® */
 	ResetGameFlag2( );
 	sprintf(string,MAP_DATA_PATH "i%d_%d.map", (int)stage , (int)1, (int)d_num );
 	if ( LoadGameFlag2(string) == 0 )
@@ -3189,17 +3090,18 @@ void wait_scl3( )
 	sprintf( string,MAP_DATA_PATH "e%d_%d.map", (int)stage , (int)1, (int)d_num );
 	LoadGameFlag2( string );
 	
+	/* ãƒªãƒˆãƒ©ã‚¤å ´æ‰€è¨­å®š */
 	player[15] = player[0];
 	player[16] = player[1];
-
-
 }
 
+// ãŠã‚„ã¤ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼è¡¨ç¤º
 void snack_counter_disp()
 {
 	Sint32 count;
 	Sint32 i;
 
+	// ãŠã‚„ã¤ã‚«ã‚¦ãƒ³ãƒˆ
 	count = 0;
 	for(i = 0; i < 20; i++)
 	{
@@ -3214,7 +3116,7 @@ void snack_counter_disp()
 	BltNumericImage2( count, 2, 140, 2, 18, 0, 0, 10, 8 );
 }
 
-
+//ãƒŸãƒ‹ãƒãƒƒãƒ—ã®è¡¨ç¤º
 void minimap_disp( void )
 {
 	Sint32 px;
@@ -3236,10 +3138,11 @@ void minimap_disp( void )
 	}
 
 	Blt( 70, px, py );
+	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼
 	x = px + 0      + ((player[0] / 32 + 0) * size);
 	y = py + height - ((player[1] / 32 + 1) * size);
 	BltRect( 127, x, y, 127, 191, size, size );
-
+	// ãŠã‚„ã¤
 	for( i = 0; i < 20; i++)
 	{
 		if ( enemy[0 +( i * 20 )] == 1 )
@@ -3252,7 +3155,7 @@ void minimap_disp( void )
 	}
 }
 
-
+//æƒ…å ±è¡¨ç¤º
 void mapdisp()
 {
 	int stage_hosei;
@@ -3264,13 +3167,14 @@ void mapdisp()
 		stage_hosei = 50;
 	}
 
+	/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼çŠ¶æ…‹è¡¨ç¤º */
 	if ( gameflag[132] == 1 )
 	{
 		if ( stage != 0 )
 		{
 			BltRect( 18, 260, 2, 0, 32, 100, 8 );	/* replay */
 		}
-
+		/* ã‚­ãƒ¼å…¥åŠ› */
 		if ( replay_load_key[0] == 1 )  /* l */
 		{
 			if ( replay_load_key[2] == 1 )  /* up */
@@ -3337,7 +3241,7 @@ void mapdisp()
 	/* Game HUD in-game - Gameblabla */
 	if ( stage != 0 )
 	{	
-		if ( gameflag[127] == 1 )	//ƒg[ƒ^ƒ‹ƒAƒ^ƒbƒN
+		if ( gameflag[127] == 1 )	//ãƒˆãƒ¼ã‚¿ãƒ«ã‚¢ã‚¿ãƒƒã‚¯
 		{
 			BltRect( 18, 5, DISPLY_HEIGHT - 20, 0, 128, 100, 8 );	/* rank */
 		}
@@ -3364,7 +3268,7 @@ void mapdisp()
 		BltRect( 18, 10, 2, 0, 40, 100, 8 );	/*  */
 		BltNumericImage2( save_data[3], 2, 60, 2, 18, 0, 0, 10, 8 );	/* d_num */
 
-		if ( gameflag[127] == 1 )	
+		if ( gameflag[127] == 1 )	//ãƒˆãƒ¼ã‚¿ãƒ«ã‚¢ã‚¿ãƒƒã‚¯
 		{
 			BltRect( 18, 180, 2, 0, 120, 100, 8 );	/*  */
 			BltNumericImage2( gameflag[136], 3, 220, 2, 18, 0, 0, 10, 8 );	/* miss count */
@@ -3381,11 +3285,11 @@ void mapdisp()
 		BltRect( 18, 200, DISPLY_HEIGHT - 10 , 0, 8, 100, 8 );	/*  */
 		BltRect( 18, 155, DISPLY_HEIGHT - 10 , 0, 24, 100, 8 );	/*  */
 
-		BltNumericImage( play_time[0], 2, 110, DISPLY_HEIGHT - 10, 18, 0, 0, 10, 8 );	/* ŠÔ */
-		BltNumericImage( play_time[1], 2, 80, DISPLY_HEIGHT - 10, 18, 0, 0, 10, 8 );	/* ŠÔ */
-		BltNumericImage( play_time[2], 2, 50, DISPLY_HEIGHT - 10, 18, 0, 0, 10, 8 );	/* ŠÔ */
+		BltNumericImage( play_time[0], 2, 110, DISPLY_HEIGHT - 10, 18, 0, 0, 10, 8 );	/* æ™‚é–“ */
+		BltNumericImage( play_time[1], 2, 80, DISPLY_HEIGHT - 10, 18, 0, 0, 10, 8 );	/* æ™‚é–“ */
+		BltNumericImage( play_time[2], 2, 50, DISPLY_HEIGHT - 10, 18, 0, 0, 10, 8 );	/* æ™‚é–“ */
 
-		if ( gameflag[127] == 1 )	
+		if ( gameflag[127] == 1 )	//ãƒˆãƒ¼ã‚¿ãƒ«ã‚¢ã‚¿ãƒƒã‚¯
 		{
 			wk = get2keta( gameflag[137] , 1 );
 			BltNumericImage( wk, 2, 260, DISPLY_HEIGHT - 10, 18, 0, 0, 10, 8 );	
@@ -3412,7 +3316,7 @@ void mapdisp()
 
 }
 
-
+//é–‹å§‹
 void stage_start( )
 {
 	int x = 0;
@@ -3420,7 +3324,7 @@ void stage_start( )
 	int rec = 0;
 	int rec2 = 0;
 
-	KeyInput( );
+	KeyInput( );	// ã‚­ãƒ¼å…¥åŠ›
 	demo[0]++;
 	rec = 32 - ( demo[0] * 2 );
 	if ( rec < 0 )
@@ -3450,11 +3354,11 @@ void stage_start( )
 
 void stage_endj( )
 {
-	if ( player[8] <= 0 )
+	if ( player[8] <= 0 )		/* ãƒ©ã‚¤ãƒ•ï¼ */
 	{
-		player[2] = 32;
-		player[10] = 0;
-		player[11] = 0;
+		player[2] = 32;	/* ãƒ€ã‚¦ãƒ³ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ */
+		player[10] = 0;	/* ãƒ€ã‚¦ãƒ³ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ */
+		player[11] = 0;	/* ãƒ€ã‚¦ãƒ³ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ */
 		sn = 3;
 		demo[0] = 0;
 	}
@@ -3479,7 +3383,7 @@ void stage_claer( )
 	
 	play_time[4] = 1000000 + ( play_time[2] * 10000 ) + ( play_time[1] * 100 ) + ( play_time[0] );
 
-	if ( gameflag[127] == 0 )
+	if ( gameflag[127] == 0 )	//ãƒˆãƒ¼ã‚¿ãƒ«ã‚¢ã‚¿ãƒƒã‚¯
 	{
 		if ( ( gameflag[300 + save_data[3] + stage_hosei] > Jump_counts ) )
 		{
@@ -3525,7 +3429,7 @@ void stage_claer( )
 	{
 		if ( gameflag[132] == 0 )
 		{
-			if ( gameflag[127] == 1 )	//ƒg[ƒ^ƒ‹ƒAƒ^ƒbƒN
+			if ( gameflag[127] == 1 )	//ãƒˆãƒ¼ã‚¿ãƒ«ã‚¢ã‚¿ãƒƒã‚¯
 			{
 				gameflag[135] = play_time[4];
 			}
@@ -3534,14 +3438,14 @@ void stage_claer( )
 				replay_file_save_w( );
 				if ( gameflag[200 + save_data[3] + stage_hosei] > play_time[4] )
 				{
-					gameflag[200 + save_data[3] + stage_hosei] = play_time[4];	/* ƒXƒRƒA•Û‘¶ */
+					gameflag[200 + save_data[3] + stage_hosei] = play_time[4];	/* ã‚¹ã‚³ã‚¢ä¿å­˜ */
 				
 					replay_file_save( 0 );
 				}
 
 				if ( gameflag[300 + save_data[3] + stage_hosei] > Jump_counts )
 				{
-					gameflag[300 + save_data[3] + stage_hosei] = Jump_counts;	/* ƒXƒRƒA•Û‘¶ */
+					gameflag[300 + save_data[3] + stage_hosei] = Jump_counts;	/* ã‚¹ã‚³ã‚¢ä¿å­˜ */
 				
 					replay_file_save( 1 );
 				}
@@ -3557,7 +3461,7 @@ void stage_claer( )
 		{
 			replay_file_save_w( );
 			save_data[3]++;
-			if ( ( gameflag[124] == 1 ) || ( stage == 0 ) )	/* ƒŠƒvƒŒƒC‚n‚m‚d */
+			if ( ( gameflag[124] == 1 ) || ( stage == 0 ) )	/* ãƒªãƒ—ãƒ¬ã‚¤ï¼¯ï¼®ï¼¥ */
 			{
 				gameflag[40] = 1;
 				g_scene = EN_SN_TITLE;
@@ -3611,15 +3515,15 @@ void stage_end( )
 
 	if ( demo[0] > 180 )
 	{
-		if ( player[8] <= 0 )		/* ƒ‰ƒCƒt‚O */
+		if ( player[8] <= 0 )		/* ãƒ©ã‚¤ãƒ•ï¼ */
 		{
 			gameflag[136]++;
-			if ( gameflag[136] > 999 )	/* ƒ~ƒXƒJƒEƒ“ƒg */
+			if ( gameflag[136] > 999 )	/* ãƒŸã‚¹ã‚«ã‚¦ãƒ³ãƒˆ */
 			{
 				gameflag[136] = 999;
 			}
 		}
-		if ( gameflag[127] == 1 )	//ƒg[ƒ^ƒ‹ƒAƒ^ƒbƒN
+		if ( gameflag[127] == 1 )	//ãƒˆãƒ¼ã‚¿ãƒ«ã‚¢ã‚¿ãƒƒã‚¯
 		{
 			play_time[4] = 1000000 + ( play_time[2] * 10000 ) + ( play_time[1] * 100 ) + ( play_time[0] );
 			gameflag[135] = play_time[4];
@@ -3641,13 +3545,13 @@ void p_shot_set( Sint32 type , Sint32 muki, Sint32 houkou )
 			pshot[( i * 10 ) + 0 ] = 1;
 			pshot[( i * 10 ) + 1 ] = player[0];
 			pshot[( i * 10 ) + 2 ] = player[1];
-			pshot[( i * 10 ) + 3 ] = houkou;
-			pshot[( i * 10 ) + 4 ] = muki;
+			pshot[( i * 10 ) + 3 ] = houkou;	/* å·¦å³ */
+			pshot[( i * 10 ) + 4 ] = muki;	/* æ–¹å‘ */
 			pshot[( i * 10 ) + 5 ] = 0;
 			pshot[( i * 10 ) + 6 ] = 0;
 			pshot[( i * 10 ) + 7 ] = type;
-			pshot[( i * 10 ) + 8 ] = 0;		
-			pshot[( i * 10 ) + 9 ] = 0;
+			pshot[( i * 10 ) + 8 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
+			pshot[( i * 10 ) + 9 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
 			
 			break;
 		}
@@ -3671,36 +3575,36 @@ void p_shot_disp( )
 				{
 					pshot[( i * 10 ) + 1 ] = player[0] - 16;
 					pshot[( i * 10 ) + 2 ] = player[1] + 16;
-					pshot[( i * 10 ) + 8 ] = 0;	
-					pshot[( i * 10 ) + 9 ] = 0;	
+					pshot[( i * 10 ) + 8 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
+					pshot[( i * 10 ) + 9 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
 				}
 				if ( pshot[( i * 10 ) + 4 ] == 1 )
 				{
 					pshot[( i * 10 ) + 1 ] = player[0] + 5;
 					pshot[( i * 10 ) + 2 ] = player[1] + 10;
-					pshot[( i * 10 ) + 8 ] = 0;		/* ‚ ‚½‚è”»’èÀ•WX */
-					pshot[( i * 10 ) + 9 ] = 0;		/* ‚ ‚½‚è”»’èÀ•WX */
+					pshot[( i * 10 ) + 8 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
+					pshot[( i * 10 ) + 9 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
 				}
 				if ( pshot[( i * 10 ) + 4 ] == 2 )
 				{
 					pshot[( i * 10 ) + 1 ] = player[0] + 5;
 					pshot[( i * 10 ) + 2 ] = player[1] - 16;
-					pshot[( i * 10 ) + 8 ] = 0;		/* ‚ ‚½‚è”»’èÀ•WX */
-					pshot[( i * 10 ) + 9 ] = 0;		/* ‚ ‚½‚è”»’èÀ•WX */
+					pshot[( i * 10 ) + 8 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
+					pshot[( i * 10 ) + 9 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
 				}
 				if ( pshot[( i * 10 ) + 4 ] == 3 )
 				{
 					pshot[( i * 10 ) + 1 ] = player[0] + 5;
 					pshot[( i * 10 ) + 2 ] = player[1] - 43;
-					pshot[( i * 10 ) + 8 ] = 0;		/* ‚ ‚½‚è”»’èÀ•WX */
-					pshot[( i * 10 ) + 9 ] = 0;		/* ‚ ‚½‚è”»’èÀ•WX */
+					pshot[( i * 10 ) + 8 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
+					pshot[( i * 10 ) + 9 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
 				}
 				if ( pshot[( i * 10 ) + 4 ] == 4 )
 				{
 					pshot[( i * 10 ) + 1 ] = player[0] - 16;
 					pshot[( i * 10 ) + 2 ] = player[1] - 43;
-					pshot[( i * 10 ) + 8 ] = 0;		/* ‚ ‚½‚è”»’èÀ•WX */
-					pshot[( i * 10 ) + 9 ] = 0;		/* ‚ ‚½‚è”»’èÀ•WX */
+					pshot[( i * 10 ) + 8 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
+					pshot[( i * 10 ) + 9 ] = 0;		/* ã‚ãŸã‚Šåˆ¤å®šåº§æ¨™X */
 				}
 			}
 			else if ( pshot[( i * 10 ) + 3 ] == 1 )
@@ -3800,6 +3704,8 @@ void p_shot_f2_set( Sint32 x, Sint32 y , Sint32 muki )
 	Sint32 rg;
 	Sint32 max;
 	
+	/* ç™ºç”Ÿä½ç½®X */
+	/* ç™ºç”Ÿä½ç½®Y */
 
 	max = 10;
 	
@@ -3813,15 +3719,15 @@ void p_shot_f2_set( Sint32 x, Sint32 y , Sint32 muki )
 		{
 			if ( pshotf2[ii * 10 + 2] == 0 )
 			{
-				pshotf2[ii * 10 + 0] = funcSin( rg ) * k;		/* ’e‘¬x */
-				pshotf2[ii * 10 + 1] = funcCos( rg ) * k;		/* ’e‘¬y */
-				pshotf2[ii * 10 + 2] = 1;				/* ‘¶İ */									
-				pshotf2[ii * 10 + 3] = 1;				/* •ûŒü */
-				pshotf2[ii * 10 + 4] = 0 ;			/* Á‚¦‚é‚Ü‚Å‚ÌƒtƒŒ[ƒ€” */
-				pshotf2[ii * 10 + 5] = ( x ) << 16 ;	/* ‰ŠúˆÊ’u‚Ìİ’è */
+				pshotf2[ii * 10 + 0] = funcSin( rg ) * k;		/* å¼¾é€Ÿx */
+				pshotf2[ii * 10 + 1] = funcCos( rg ) * k;		/* å¼¾é€Ÿy */
+				pshotf2[ii * 10 + 2] = 1;				/* å­˜åœ¨ */									
+				pshotf2[ii * 10 + 3] = 1;				/* æ–¹å‘ */
+				pshotf2[ii * 10 + 4] = 0 ;			/* æ¶ˆãˆã‚‹ã¾ã§ã®ãƒ•ãƒ¬ãƒ¼ãƒ æ•° */
+				pshotf2[ii * 10 + 5] = ( x ) << 16 ;	/* åˆæœŸä½ç½®ã®è¨­å®š */
 				pshotf2[ii * 10 + 6] = ( y ) << 16 ;
-				pshotf2[ii * 10 + 7] = 0 ;			/* Á‚¦‚é‚Ü‚Å‚ÌƒtƒŒ[ƒ€” */
-				pshotf2[ii * 10 + 8] = 2 ; 			/* Á‚¦‚é‚Ü‚Å‚ÌƒtƒŒ[ƒ€” */
+				pshotf2[ii * 10 + 7] = 0 ;			/* æ¶ˆãˆã‚‹ã¾ã§ã®ãƒ•ãƒ¬ãƒ¼ãƒ æ•° */
+				pshotf2[ii * 10 + 8] = 2 ; 			/* æ¶ˆãˆã‚‹ã¾ã§ã®ãƒ•ãƒ¬ãƒ¼ãƒ æ•° */
 				break;
 			}
 		}
@@ -3836,17 +3742,17 @@ void p_shot_f2_disp( )
 		if ( pshotf2[ii * 10 + 2] == 1 )
 		{
 			BltRect( 5, ( pshotf2[ii * 10 + 5] >> 16 ) - d_x, 480 - ( pshotf2[ii * 10 + 6] >> 16 ) - 4 - d_y, pshotf2[ii * 10 + 4] * 4, 32, 4, 4 );
-			pshotf2[ii * 10 + 5] = pshotf2[ii * 10 + 0] + pshotf2[ii * 10 + 5];		/* ’e‘¬x */
-			pshotf2[ii * 10 + 6] = pshotf2[ii * 10 + 1] + pshotf2[ii * 10 + 6];		/* ’e‘¬x */
-			pshotf2[ii * 10 + 3] = 1;				/* •ûŒü */
-			pshotf2[ii * 10 + 7]++ ;			/* Á‚¦‚é‚Ü‚Å‚ÌƒtƒŒ[ƒ€” */
+			pshotf2[ii * 10 + 5] = pshotf2[ii * 10 + 0] + pshotf2[ii * 10 + 5];		/* å¼¾é€Ÿx */
+			pshotf2[ii * 10 + 6] = pshotf2[ii * 10 + 1] + pshotf2[ii * 10 + 6];		/* å¼¾é€Ÿx */
+			pshotf2[ii * 10 + 3] = 1;				/* æ–¹å‘ */
+			pshotf2[ii * 10 + 7]++ ;			/* æ¶ˆãˆã‚‹ã¾ã§ã®ãƒ•ãƒ¬ãƒ¼ãƒ æ•° */
 			if ( pshotf2[ii * 10 + 7] >= pshotf2[ii * 10 + 8] )
 			{
 				pshotf2[ii * 10 + 7] = 0;
-				pshotf2[ii * 10 + 4] = pshotf2[ii * 10 + 4] + 1 ;			/* Á‚¦‚é‚Ü‚Å‚ÌƒtƒŒ[ƒ€” */
+				pshotf2[ii * 10 + 4] = pshotf2[ii * 10 + 4] + 1 ;			/* æ¶ˆãˆã‚‹ã¾ã§ã®ãƒ•ãƒ¬ãƒ¼ãƒ æ•° */
 				if ( pshotf2[ii * 10 + 4] >= 10 )
 				{
-					pshotf2[ii * 10 + 2] = 0;				/* ‘¶İ–³‚µ */									
+					pshotf2[ii * 10 + 2] = 0;				/* å­˜åœ¨ç„¡ã— */									
 				}
 			}
 		}
@@ -3881,19 +3787,19 @@ void item_set( Sint32 type, Sint32 x, Sint32 y, Sint32 iti, Sint32 g_num )
 			item[( i * 10 ) + 3 ] = type;
 			item[( i * 10 ) + 4 ] = iti;
 			item[( i * 10 ) + 5 ] = g_num;
-			item[( i * 10 ) + 6 ] = stage;	/* ƒXƒe[ƒW” */
-			item[( i * 10 ) + 7 ] = 0;	/* ƒCƒxƒ“ƒg–³Œøƒtƒ‰ƒOi1:•\¦‚Ì‚İj */
+			item[( i * 10 ) + 6 ] = stage;	/* ã‚¹ãƒ†ãƒ¼ã‚¸æ•° */
+			item[( i * 10 ) + 7 ] = 0;	/* ã‚¤ãƒ™ãƒ³ãƒˆç„¡åŠ¹ãƒ•ãƒ©ã‚°ï¼ˆ1:è¡¨ç¤ºã®ã¿ï¼‰ */
 			
-			/* ƒ[ƒv‚ÌƒOƒ‰ƒtƒBƒbƒN•ÏX */
-			if ( ( save_data[30] == 1 ) && ( type == 5 ) )	/* ƒ[ƒv‰Â”\ */
+			/* ãƒ¯ãƒ¼ãƒ—ã®ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯å¤‰æ›´ */
+			if ( ( save_data[30] == 1 ) && ( type == 5 ) )	/* ãƒ¯ãƒ¼ãƒ—å¯èƒ½ */
 			{
-				item[( i * 10 ) + 3 ] = 6;					/* ƒ[ƒv‰Â”\ƒAƒCƒeƒ€‚É•ÏX */
+				item[( i * 10 ) + 3 ] = 6;					/* ãƒ¯ãƒ¼ãƒ—å¯èƒ½ã‚¢ã‚¤ãƒ†ãƒ ã«å¤‰æ›´ */
 			}
 			
-			/* 620‚Ü‚Å‚Í”z’uƒCƒxƒ“ƒg‚ğs‚¤ */
+			/* 620ã¾ã§ã¯é…ç½®æ™‚ã‚¤ãƒ™ãƒ³ãƒˆã‚’è¡Œã† */
 			if ( ( type >= 100 ) && ( type <= 620 ) )
 			{
-//				init_event_set( item[( i * 10 ) + 3 ] , i );	/* ”z’uğŒ */
+//				init_event_set( item[( i * 10 ) + 3 ] , i );	/* é…ç½®æ¡ä»¶ */
 			}
 			break;
 		}
@@ -3952,8 +3858,8 @@ void item_disp( )
 
 				BltRect( 12 , item[1 + ( i * 10 )] - d_x, ( 0 - item[2 + ( i * 10 )] ) + 480 - 32 - d_y, 32 * bx, by * 32, 32, 32 );
 			}
-			/* ƒvƒŒƒCƒ„[‚Æ‚Ì“–‚½‚è”»’è */
-			if ( ( ( (item[1 + ( i * 10 )] + 2 ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+			/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
+			if ( ( ( (item[1 + ( i * 10 )] + 2 ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 				&& ( (player[0] + 10 ) < (item[1 + ( i * 10 )] + 30 ) )
 				&& ( (item[2 + ( i * 10 )]  + 2 ) < (player[1] + 22 ) )
 				&& ( (player[1] + 5 ) < ( item[2 + ( i * 10 )] + 30 ) ) )
@@ -3961,7 +3867,7 @@ void item_disp( )
 			{
 				if ( player[14] == 10 )
 				{
-					if ( ( item[( i * 10 ) + 3 ] >= 300 ) && ( item[( i * 10 ) + 3 ] <= 420 ) ) /* d‚È‚Á‚Ä”­¶‚·‚éƒCƒxƒ“ƒg */
+					if ( ( item[( i * 10 ) + 3 ] >= 300 ) && ( item[( i * 10 ) + 3 ] <= 420 ) ) /* é‡ãªã£ã¦ç™ºç”Ÿã™ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ */
 					{
 						if ( item[( i * 10 ) + 7 ] == 0 )
 						{
@@ -3975,12 +3881,12 @@ void item_disp( )
 					}
 				}
 				if ( 
-				     ( item[( i * 10 ) + 3 ] == 1 ) /* ƒ_ƒ[ƒW°*/
-				  || ( item[( i * 10 ) + 3 ] == 2 ) /* ƒ_ƒ[ƒW° */
-				  || ( item[( i * 10 ) + 3 ] == 3 ) /* ƒ_ƒ[ƒW° */
-				  || ( item[( i * 10 ) + 3 ] == 4 ) /* ƒ_ƒ[ƒW° */
-				  || ( item[( i * 10 ) + 3 ] == 703 ) /* ƒ_ƒ[ƒW° */
-				  || ( item[( i * 10 ) + 3 ] == 704 ) /* ƒ_ƒ[ƒW° */
+				     ( item[( i * 10 ) + 3 ] == 1 ) /* ãƒ€ãƒ¡ãƒ¼ã‚¸åºŠ*/
+				  || ( item[( i * 10 ) + 3 ] == 2 ) /* ãƒ€ãƒ¡ãƒ¼ã‚¸åºŠ */
+				  || ( item[( i * 10 ) + 3 ] == 3 ) /* ãƒ€ãƒ¡ãƒ¼ã‚¸åºŠ */
+				  || ( item[( i * 10 ) + 3 ] == 4 ) /* ãƒ€ãƒ¡ãƒ¼ã‚¸åºŠ */
+				  || ( item[( i * 10 ) + 3 ] == 703 ) /* ãƒ€ãƒ¡ãƒ¼ã‚¸åºŠ */
+				  || ( item[( i * 10 ) + 3 ] == 704 ) /* ãƒ€ãƒ¡ãƒ¼ã‚¸åºŠ */
 				   )
 				{
 					player[8] = player[8] - 1;
@@ -3990,7 +3896,7 @@ void item_disp( )
 
 			if ( sn == 1 )
 			{
-				if ( item[( i * 10 ) + 3 ] == 701 ) 	/* ˆÚ“®°Ac */
+				if ( item[( i * 10 ) + 3 ] == 701 ) 	/* ç§»å‹•åºŠã€ç¸¦ */
 				{
 					if ( item[8 + ( i * 10 )] == 0 )
 					{
@@ -4031,7 +3937,7 @@ void item_disp( )
 						}
 					}
 				}
-				if ( item[( i * 10 ) + 3 ] == 702 ) 	/* ˆÚ“®°A‰¡ */
+				if ( item[( i * 10 ) + 3 ] == 702 ) 	/* ç§»å‹•åºŠã€æ¨ª */
 				{
 					if ( item[8 + ( i * 10 )] == 0 )
 					{
@@ -4049,7 +3955,7 @@ void item_disp( )
 							else 
 							{
 								item[1 + ( i * 10 )]++;
-								if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+								if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 									&& ( (player[0] + 10 ) < (item[1 + ( i * 10 )] + 32 ) )
 									&& ( (item[2 + ( i * 10 )] + 27 ) < (player[1] + 10 ) )
 									&& ( (player[1] - 1 ) < ( item[2 + ( i * 10 )] + 32 ) ) ) )
@@ -4076,7 +3982,7 @@ void item_disp( )
 							else 
 							{
 								item[1 + ( i * 10 )]--;
-								if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+								if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 									&& ( (player[0] + 10 ) < (item[1 + ( i * 10 )] + 32 ) )
 									&& ( (item[2 + ( i * 10 )] + 27 ) < (player[1] + 10 ) )
 									&& ( (player[1] - 1 ) < ( item[2 + ( i * 10 )] + 32 ) ) ) )
@@ -4088,7 +3994,7 @@ void item_disp( )
 						}
 					}
 				}
-				if ( item[( i * 10 ) + 3 ] == 703 ) 	/* ˆÚ“®°Ac */
+				if ( item[( i * 10 ) + 3 ] == 703 ) 	/* ç§»å‹•åºŠã€ç¸¦ */
 				{
 					if ( item[8 + ( i * 10 )] == 0 )
 					{
@@ -4141,7 +4047,7 @@ void item_disp( )
 						}
 					}
 				}
-				if ( item[( i * 10 ) + 3 ] == 704 ) 	/* ˆÚ“®°A‰¡ */
+				if ( item[( i * 10 ) + 3 ] == 704 ) 	/* ç§»å‹•åºŠã€æ¨ª */
 				{
 					if ( item[8 + ( i * 10 )] == 0 )
 					{
@@ -4194,7 +4100,7 @@ void item_disp( )
 				
 				for ( k = 0; k < 40 ; k++ )
 				{
-					/* ƒvƒŒƒCƒ„[‚Ì’e‚Æ‚Ì“–‚½‚è”»’è */
+					/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å¼¾ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
 					if ( ( ( ( item[1 + i * 10] ) < ( ( pmshot[5 + k * 20] >> 16 ) + 32 ) )
 						&& ( ( ( pmshot[5 + k * 20] >> 16 ) ) < ( item[1 + i * 10] + 32 ) )
 						&& ( ( item[2 + i * 10] ) < ( ( pmshot[6 + k * 20] >> 16 ) + 32 ) )
@@ -4202,7 +4108,7 @@ void item_disp( )
 						&& ( pmshot[2 + k * 20] == 1 )
 						&& ( sn == 1 ) )
 					{
-	//					if ( item[( i * 10 ) + 3 ] == 1 ) /* ƒCƒxƒ“ƒg */
+	//					if ( item[( i * 10 ) + 3 ] == 1 ) /* ã‚¤ãƒ™ãƒ³ãƒˆ */
 	//					{
 	//					}
 					}
@@ -4230,10 +4136,10 @@ Sint32 item_up( )
 			by = item[3 + ( i * 10 )] / 100 ;
 			
 			if ( ( by == 5 ) 
-			  || ( by == 6 ) /* ‘ä */
+			  || ( by == 6 ) /* å° */
 			  || ( ( by == 0 ) && ( bx == 7 ) ) )
 			{
-				if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+				if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 					&& ( (player[0] + 10 ) < (item[1 + ( i * 10 )] + 32 ) )
 					&& ( (item[2 + ( i * 10 )] + 27 ) < (player[1] + 10 ) )
 					&& ( (player[1] - 1 ) < ( item[2 + ( i * 10 )] + 32 ) ) ) )
@@ -4241,9 +4147,9 @@ Sint32 item_up( )
 					return( item[2 + ( i * 10 )] + 32 );
 				}
 			}
-			if ( ( by == 7 ) && ( bx == 1 ) )	/* 	ˆÚ“®°Ac */
+			if ( ( by == 7 ) && ( bx == 1 ) )	/* 	ç§»å‹•åºŠã€ç¸¦ */
 			{
-				if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+				if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 					&& ( (player[0] + 10 ) < (item[1 + ( i * 10 )] + 32 ) )
 					&& ( (item[2 + ( i * 10 )] + 27 ) < (player[1] + 10 ) )
 					&& ( (player[1] - 1 ) < ( item[2 + ( i * 10 )] + 32 ) ) ) )
@@ -4251,9 +4157,9 @@ Sint32 item_up( )
 					return( item[2 + ( i * 10 )] + 31 );
 				}
 			}
-			if ( ( by == 7 ) && ( bx == 2 ) )	/* ˆÚ“®°A‰¡ */
+			if ( ( by == 7 ) && ( bx == 2 ) )	/* ç§»å‹•åºŠã€æ¨ª */
 			{
-				if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+				if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 					&& ( (player[0] + 10 ) < (item[1 + ( i * 10 )] + 32 ) )
 					&& ( (item[2 + ( i * 10 )] + 27 ) < (player[1] + 10 ) )
 					&& ( (player[1] - 1 ) < ( item[2 + ( i * 10 )] + 32 ) ) ) )
@@ -4279,10 +4185,10 @@ Sint32 item_up2( )
 			by = item[3 + ( i * 10 )] / 100 ;
 			
 			if ( ( by == 5 ) 
-			  || ( by == 6 ) /* ‘ä */
+			  || ( by == 6 ) /* å° */
 			  || ( ( by == 0 ) && ( bx == 7 ) ) )
 			{
-				if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+				if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 					&& ( (player[0] + 10 ) < (item[1 + ( i * 10 )] + 32 ) )
 					&& ( (item[2 + ( i * 10 )] + 0 ) < (player[1] + 33 ) )
 					&& ( (player[1] + 20 ) < ( item[2 + ( i * 10 )] + 32 ) ) ) )
@@ -4295,7 +4201,7 @@ Sint32 item_up2( )
 	return( -1 );
 }
 
-/* ƒAƒCƒeƒ€‚Éd‚È‚Á‚Äã‚ª‰Ÿ‚³‚ê‚½‚ÌƒCƒxƒ“ƒg */
+/* ã‚¢ã‚¤ãƒ†ãƒ ã«é‡ãªã£ã¦ä¸ŠãŒæŠ¼ã•ã‚ŒãŸæ™‚ã®ã‚¤ãƒ™ãƒ³ãƒˆ */
 Sint32 item_event( )
 {
 	Sint32 i;
@@ -4310,21 +4216,21 @@ Sint32 item_event( )
 		{
 			r_f = 0;
 			
-			/* ƒvƒŒƒCƒ„[‚Æ‚Ì“–‚½‚è”»’è */
-			if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+			/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
+			if ( ( ( (item[1 + ( i * 10 )]  ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 				&& ( (player[0] + 10 ) < (item[1 + ( i * 10 )] + 32 ) )
 				&& ( (item[2 + ( i * 10 )] ) < (player[1] + 32 ) )
 				&& ( (player[1] + 5 ) < ( item[2 + ( i * 10 )] + 32 ) ) )
 				&& ( player[14] == 10 ) )
 			{
 				r_f = 1;
-				player[18] = 0;	/* ’…’nƒ‚[ƒVƒ‡ƒ“‚Æ‚Ù‚Á‚½‚ç‚©‚µƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‰ğœ */
+				player[18] = 0;	/* ç€åœ°ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ã¨ã»ã£ãŸã‚‰ã‹ã—ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®è§£é™¤ */
 
 			}
 
 			if ( ( r_f == 1 ) && ( item[( i * 10 ) + 7 ] == 0 ) )
 			{
-				if ( ( item[( i * 10 ) + 3 ] >= 100 ) && ( item[( i * 10 ) + 3 ] <= 220 ) ) /* ŠÅ”Â */
+				if ( ( item[( i * 10 ) + 3 ] >= 100 ) && ( item[( i * 10 ) + 3 ] <= 220 ) ) /* çœ‹æ¿ */
 				{
 					rc = 1;
 //					event_set( item[( i * 10 ) + 3 ] , i );
@@ -4338,7 +4244,7 @@ Sint32 item_event( )
 }
 
 
-//“Gì¬
+//æ•µä½œæˆ
 void enm_set( Sint32 type, Sint32 x, Sint32 y )
 {	
 	Sint32 i;
@@ -4362,30 +4268,30 @@ void enm_set( Sint32 type, Sint32 x, Sint32 y )
 			size = type / 100;
 			syu = type % 100;
 			enemy[3 + ( i * 20 )] = size;
-			if ( size >= 4 )	/* ƒ{ƒX */
+			if ( size >= 4 )	/* ãƒœã‚¹ */
 			{
 				sprintf(string,ENM_IMAGE_PATH "boss%d.bmp", (int)syu );
-				LoadBitmap(string,43,true);								//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+				LoadBitmap(string,43,true);								//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 				syu = 1;
 			}
 			enemy[4 + ( i * 20 )] = syu;
 			enemy[5 + ( i * 20 )] = e_hp( type ) ;
-			enemy[6 + ( i * 20 )] = 0;				/* ‚â‚ç‚êƒJƒEƒ“ƒ^ */
-			enemy[7 + ( i * 20 )] = 0;				/* ˆÊ’u•â³ */
-			enemy[8 + ( i * 20 )] = 0;				/* •\¦ƒpƒ^[ƒ“ */
-			enemy[9 + ( i * 20 )] = 0;				/* Œü‚« */
-			enemy[10+ ( i * 20 )] = 0;				/* •\¦‚x */
-			enemy[11+ ( i * 20 )] = type;			/* í—Ş */
-			enemy[12+ ( i * 20 )] = 0;				/* ƒWƒƒƒ“ƒvƒtƒŒ[ƒ€ƒJƒEƒ“ƒ^ */
-			enemy[13+ ( i * 20 )] = 0;				/* ƒWƒƒƒ“ƒvƒJƒEƒ“ƒ^ */
-			enemy[14+ ( i * 20 )] = x;				/* Ä”z’uî•ñX */
-			enemy[15+ ( i * 20 )] = y;				/* Ä”z’uî•ñY */
-			enemy[16+ ( i * 20 )] = 0;				/* –³“GŠÔ */
+			enemy[6 + ( i * 20 )] = 0;				/* ã‚„ã‚‰ã‚Œã‚«ã‚¦ãƒ³ã‚¿ */
+			enemy[7 + ( i * 20 )] = 0;				/* ä½ç½®è£œæ­£ */
+			enemy[8 + ( i * 20 )] = 0;				/* è¡¨ç¤ºãƒ‘ã‚¿ãƒ¼ãƒ³ */
+			enemy[9 + ( i * 20 )] = 0;				/* å‘ã */
+			enemy[10+ ( i * 20 )] = 0;				/* è¡¨ç¤ºï¼¹ */
+			enemy[11+ ( i * 20 )] = type;			/* ç¨®é¡ */
+			enemy[12+ ( i * 20 )] = 0;				/* ã‚¸ãƒ£ãƒ³ãƒ—ãƒ•ãƒ¬ãƒ¼ãƒ ã‚«ã‚¦ãƒ³ã‚¿ */
+			enemy[13+ ( i * 20 )] = 0;				/* ã‚¸ãƒ£ãƒ³ãƒ—ã‚«ã‚¦ãƒ³ã‚¿ */
+			enemy[14+ ( i * 20 )] = x;				/* å†é…ç½®æƒ…å ±X */
+			enemy[15+ ( i * 20 )] = y;				/* å†é…ç½®æƒ…å ±Y */
+			enemy[16+ ( i * 20 )] = 0;				/* ç„¡æ•µæ™‚é–“ */
 			enemy[17+ ( i * 20 )] = 0;
 			enemy[18+ ( i * 20 )] = 0;
 			enemy[19+ ( i * 20 )] = 0;				/*  */
 
-			if ( size >= 4 )	/* ƒ{ƒX */
+			if ( size >= 4 )	/* ãƒœã‚¹ */
 			{
 //				init_event_set_enm( enemy[11+ ( i * 20 )] , i );
 				enemy[17+ ( i * 20 )] = 1;
@@ -4395,7 +4301,7 @@ void enm_set( Sint32 type, Sint32 x, Sint32 y )
 	}
 }
 
-//“Gì¬
+//æ•µä½œæˆ
 void enm_set2( Sint32 type, Sint32 x, Sint32 y ,Sint32 muki )
 {	
 	Sint32 i;
@@ -4419,30 +4325,30 @@ void enm_set2( Sint32 type, Sint32 x, Sint32 y ,Sint32 muki )
 			size = type / 100;
 			syu = type % 100;
 			enemy[3 + ( i * 20 )] = size;
-			if ( size >= 4 )	/* ƒ{ƒX */
+			if ( size >= 4 )	/* ãƒœã‚¹ */
 			{
 				sprintf(string,ENM_IMAGE_PATH "boss%d.bmp", (int)syu );
-				LoadBitmap(string,43,true);								//ƒvƒŒ[ƒ“ƒiƒ“ƒo[‚Q‚ÉƒVƒXƒeƒ€—p‚a‚l‚o‚ğ“Ç‚İ‚Ş
+				LoadBitmap(string,43,true);								//ãƒ—ãƒ¬ãƒ¼ãƒ³ãƒŠãƒ³ãƒãƒ¼ï¼’ã«ã‚·ã‚¹ãƒ†ãƒ ç”¨ï¼¢ï¼­ï¼°ã‚’èª­ã¿è¾¼ã‚€
 				syu = 1;
 			}
 			enemy[4 + ( i * 20 )] = syu;
 			enemy[5 + ( i * 20 )] = e_hp( type ) ;
-			enemy[6 + ( i * 20 )] = 0;				/* ‚â‚ç‚êƒJƒEƒ“ƒ^ */
-			enemy[7 + ( i * 20 )] = 0;				/* ˆÊ’u•â³ */
-			enemy[8 + ( i * 20 )] = 0;				/* •\¦ƒpƒ^[ƒ“ */
-			enemy[9 + ( i * 20 )] = muki;			/* Œü‚« */
-			enemy[10+ ( i * 20 )] = 0;				/* •\¦‚x */
-			enemy[11+ ( i * 20 )] = type;			/* í—Ş */
-			enemy[12+ ( i * 20 )] = 0;				/* ƒWƒƒƒ“ƒvƒtƒŒ[ƒ€ƒJƒEƒ“ƒ^ */
-			enemy[13+ ( i * 20 )] = 0;				/* ƒWƒƒƒ“ƒvƒJƒEƒ“ƒ^ */
-			enemy[14+ ( i * 20 )] = x;				/* Ä”z’uî•ñX */
-			enemy[15+ ( i * 20 )] = y;				/* Ä”z’uî•ñY */
-			enemy[16+ ( i * 20 )] = 0;				/* –³“GŠÔ */
+			enemy[6 + ( i * 20 )] = 0;				/* ã‚„ã‚‰ã‚Œã‚«ã‚¦ãƒ³ã‚¿ */
+			enemy[7 + ( i * 20 )] = 0;				/* ä½ç½®è£œæ­£ */
+			enemy[8 + ( i * 20 )] = 0;				/* è¡¨ç¤ºãƒ‘ã‚¿ãƒ¼ãƒ³ */
+			enemy[9 + ( i * 20 )] = muki;			/* å‘ã */
+			enemy[10+ ( i * 20 )] = 0;				/* è¡¨ç¤ºï¼¹ */
+			enemy[11+ ( i * 20 )] = type;			/* ç¨®é¡ */
+			enemy[12+ ( i * 20 )] = 0;				/* ã‚¸ãƒ£ãƒ³ãƒ—ãƒ•ãƒ¬ãƒ¼ãƒ ã‚«ã‚¦ãƒ³ã‚¿ */
+			enemy[13+ ( i * 20 )] = 0;				/* ã‚¸ãƒ£ãƒ³ãƒ—ã‚«ã‚¦ãƒ³ã‚¿ */
+			enemy[14+ ( i * 20 )] = x;				/* å†é…ç½®æƒ…å ±X */
+			enemy[15+ ( i * 20 )] = y;				/* å†é…ç½®æƒ…å ±Y */
+			enemy[16+ ( i * 20 )] = 0;				/* ç„¡æ•µæ™‚é–“ */
 			enemy[17+ ( i * 20 )] = 0;
 			enemy[18+ ( i * 20 )] = 0;
 			enemy[19+ ( i * 20 )] = 0;				/*  */
 
-			if ( size >= 4 )	/* ƒ{ƒX */
+			if ( size >= 4 )	/* ãƒœã‚¹ */
 			{
 //				init_event_set_enm( enemy[11+ ( i * 20 )] , i );
 				enemy[17+ ( i * 20 )] = 1;
@@ -4453,7 +4359,7 @@ void enm_set2( Sint32 type, Sint32 x, Sint32 y ,Sint32 muki )
 }
 
 
-/* “G‚Ì‚g‚o‚ğİ’èie_set‚Åg‚í‚ê‚éj */
+/* æ•µã®ï¼¨ï¼°ã‚’è¨­å®šï¼ˆe_setã§ä½¿ã‚ã‚Œã‚‹ï¼‰ */
 Sint32 e_hp( Sint32 type )
 {
 	Sint32 rc;
@@ -4490,7 +4396,7 @@ void enm_disp()
 	
 	isclaer = 0; 
 	size_hosei_x = 0;
-	p_h = 32;	/* ƒvƒŒƒCƒ„[‚Ì“–‚½‚è”»’è */
+	p_h = 32;	/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å½“ãŸã‚Šåˆ¤å®š */
 	size = 0;
 	
 	for ( i = 0; i < 20; i++ )
@@ -4498,7 +4404,7 @@ void enm_disp()
 		if ( enemy[0 +( i * 20 )] == 1 )
 		{
 			isclaer = 1;
-			/* –³“GŠÔ‚ª‘¶İ‚·‚éê‡‚ÍƒJƒEƒ“ƒg */
+			/* ç„¡æ•µæ™‚é–“ãŒå­˜åœ¨ã™ã‚‹å ´åˆã¯ã‚«ã‚¦ãƒ³ãƒˆ */
 			if ( enemy[16 + ( i * 20 )] > 0 )
 			{
 				enemy[16 + ( i * 20 )]--;
@@ -4516,19 +4422,19 @@ void enm_disp()
 			{
 				size = 64;
 			}
-			if ( enemy[3 + ( i * 20 )] == 4 )	/* 5ƒ{ƒX */
+			if ( enemy[3 + ( i * 20 )] == 4 )	/* 5ãƒœã‚¹ */
 			{
 				size = 128;
 			}
-			if ( enemy[3 + ( i * 20 )] == 5 )	/* 5ƒ{ƒX */
+			if ( enemy[3 + ( i * 20 )] == 5 )	/* 5ãƒœã‚¹ */
 			{
 				size = 128;
 			}
-			if ( enemy[3 + ( i * 20 )] == 6 )	/* 6ƒ{ƒX */
+			if ( enemy[3 + ( i * 20 )] == 6 )	/* 6ãƒœã‚¹ */
 			{
 				size = 128;
 			}
-			/* ƒ{ƒX‚ÌƒTƒCƒY•â³ */
+			/* ãƒœã‚¹ã®ã‚µã‚¤ã‚ºè£œæ­£ */
 
 			if ( enemy[11+ ( i * 20 )] == 401 )	
 			{
@@ -4551,7 +4457,7 @@ void enm_disp()
 				size_hosei_y = 0;
 			}
 
-			/* ‰æ–Ê“à‚Ì“G‚¾‚¯•`‰æ‚·‚é */
+			/* ç”»é¢å†…ã®æ•µã ã‘æç”»ã™ã‚‹ */
 			disp_x_j = enemy[1 + ( i * enm_data[2] )];
 			disp_y_j = ( 0 - enemy[2 + ( i * enm_data[2] )] ) + MapInfo[3];
 
@@ -4560,11 +4466,11 @@ void enm_disp()
 			  && ( ( d_x + DISPLY_WIDTH + size ) >= ( disp_x_j ) )
 			  && ( ( d_y + DISPLY_HEIGHT + size ) >= ( disp_y_j ) ) )
 			{
-				if ( enemy[6 + ( i * 20 )] > 0 )	/* ‚â‚ç‚ê */
+				if ( enemy[6 + ( i * 20 )] > 0 )	/* ã‚„ã‚‰ã‚Œ */
 				{
 					if ( ( ( enemy[16 + ( i * 20 )] % 2 ) == 0 ) || ( sn != 1 ) )
 					{
-						if ( enemy[3 + ( i * 20 )] >= 4 )	/* ƒ{ƒX‚Ì‚Æ‚«‚Í•\¦•û–@‚ªˆá‚¤ */
+						if ( enemy[3 + ( i * 20 )] >= 4 )	/* ãƒœã‚¹ã®ã¨ãã¯è¡¨ç¤ºæ–¹æ³•ãŒé•ã† */
 						{
 							BltRect( 39 + enemy[3 + ( i * 20 )] , enemy[1 + ( i * 20 )]  - d_x, ( 0 - enemy[2 + ( i * 20 )] ) + 480 - size  - d_y, ( size * 4 ) , size + ( size * enemy[9 + ( i * 20 )] ), size, size );
 						}
@@ -4579,7 +4485,7 @@ void enm_disp()
 						
 					if ( ( ( enemy[16 + ( i * 20 )] % 2 ) == 0 ) || ( sn != 1 ) )
 					{
-						if ( enemy[3 + ( i * 20 )] >= 4 )	/* ƒ{ƒX‚Ì‚Æ‚«‚Í•\¦•û–@‚ªˆá‚¤ */
+						if ( enemy[3 + ( i * 20 )] >= 4 )	/* ãƒœã‚¹ã®ã¨ãã¯è¡¨ç¤ºæ–¹æ³•ãŒé•ã† */
 						{
 							BltRect( 39 + enemy[3 + ( i * 20 )] , enemy[1 + ( i * 20 )]  - d_x, ( 0 - enemy[2 + ( i * 20 )] ) + 480 - size  - d_y, ( size * enemy[8 + ( i * 20 )] ) , size * ( enemy[4 + ( i * 20 )] + enemy[10+ ( i * 20 )] ) + ( enemy[9 + ( i * 20 )] * size ), size, size );
 						}
@@ -4595,10 +4501,10 @@ void enm_disp()
 				}
 			}
 			
-			e_move( i );	/* “GƒLƒƒƒ‰í—Ş•Ê“®ì */
+			e_move( i );	/* æ•µã‚­ãƒ£ãƒ©ç¨®é¡åˆ¥å‹•ä½œ */
 				
 
-			if ( enemy[3 + ( i * 20 )] >= 4 )	/* 5ƒ{ƒX */
+			if ( enemy[3 + ( i * 20 )] >= 4 )	/* 5ãƒœã‚¹ */
 			{
 				if ( enemy[i * 20 + 1] > ( 640 - 128 ) )
 				{
@@ -4620,26 +4526,26 @@ void enm_disp()
 				return;
 			}
 */
-			/* ƒvƒŒƒCƒ„[‚Æ‚Ì“–‚½‚è”»’è */
-			if ( ( ( (enemy[1 + i * 20] + size_hosei_x ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+			/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
+			if ( ( ( (enemy[1 + i * 20] + size_hosei_x ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 				&& ( (player[0] + 10 ) < (enemy[1 + i * 20] + size - size_hosei_x ) )
 				&& ( (enemy[2 + i * 20] + size_hosei_y ) < (player[1] + p_h) )
 				&& ( (player[1] + 5 ) < ( enemy[2 + i * 20] + size - size_hosei_y ) ) ) 
 				&& ( player[17] <= 0 ) 
 				&& ( enemy[6 + i * 20] == 0 ) )
 			{
-				enemy[0 + ( i * 20 )] = 0;		/* Á‹ */
+				enemy[0 + ( i * 20 )] = 0;		/* æ¶ˆå» */
 				soundPlaySe( EN_SE_L1 );
 			}
 #if false
-			if ( ( ( (enemy[1 + i * 20] + size_hosei_x ) < (player[0] + player[30] + 32 ) )	/* ƒAƒ“ƒJ[‚Æ‚Ì‚ ‚½‚è”»’è */
+			if ( ( ( (enemy[1 + i * 20] + size_hosei_x ) < (player[0] + player[30] + 32 ) )	/* ã‚¢ãƒ³ã‚«ãƒ¼ã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 				&& ( (player[0] + player[30] ) < (enemy[1 + i * 20] + size - size_hosei_x ) )
 				&& ( (enemy[2 + i * 20] + size_hosei_y ) < (player[1] + player[31] + 32 ) )
 				&& ( (player[1] + player[31] ) < ( enemy[2 + i * 20] + size - size_hosei_y ) ) ) 
 				&& ( enemy[6 + i * 20] == 0 )
-				&& ( player[23] == 1 )	/* L‚Î‚µ‚Ä‚¢‚é */
-				&& ( player[24] == 0 )	/* L‚Î‚µ‚Ä‚¢‚é */
-				&& ( is_tukami == 0 ) )	/* L‚Î‚µ‚Ä‚¢‚é */
+				&& ( player[23] == 1 )	/* ä¼¸ã°ã—ã¦ã„ã‚‹ */
+				&& ( player[24] == 0 )	/* ä¼¸ã°ã—ã¦ã„ã‚‹ */
+				&& ( is_tukami == 0 ) )	/* ä¼¸ã°ã—ã¦ã„ã‚‹ */
 			{
 				if ( player[9] == 0 )
 				{
@@ -4649,13 +4555,13 @@ void enm_disp()
 					player[33] = enemy[2 + i * 20];
 					player[19] = player[21];
 				}
-				player[9] = 1;	/* ’Í‚ñ‚Å‚¢‚é */
+				player[9] = 1;	/* æ´ã‚“ã§ã„ã‚‹ */
 				is_tukami = 1;
 			}
 #endif			
-			/* “|‚¹‚È‚¢“Gij“™j */
-//			if ( ( enemy[11 + i * 20]  == 105 )		/* “dŒ‚ */
-//			  || ( enemy[11 + i * 20]  == 107 ) )	/* ”­¶ */
+			/* å€’ã›ãªã„æ•µï¼ˆé‡ç­‰ï¼‰ */
+//			if ( ( enemy[11 + i * 20]  == 105 )		/* é›»æ’ƒ */
+//			  || ( enemy[11 + i * 20]  == 107 ) )	/* ç™ºç”Ÿ */
 //			{
 //			}
 //			else 
@@ -4665,32 +4571,32 @@ void enm_disp()
 				for ( k = 0; k < 10 ; k++ )
 				{
 					size2 = 32;
-					/* ƒvƒŒƒCƒ„[‚Ì’e‚Æ‚Ì“–‚½‚è”»’è */
+					/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å¼¾ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
 					if ( ( ( (enemy[1 + i * 20]  ) < (pshot[1 + k * 10] + size2 ) )
 						&& ( (pshot[1 + k * 10] ) < (enemy[1 + i * 20] + size ) )
 						&& ( (enemy[2 + i * 20] ) < (pshot[2 + k * 10] + size2) )
 						&& ( (pshot[2 + k * 10] ) < ( enemy[2 + i * 20] + size ) ) ) 
-						&& ( pshot[0 + k * 10] == 1 ) )	/* ƒAƒjƒ[ƒVƒ‡ƒ“‚ª‚R”Ô */
+						&& ( pshot[0 + k * 10] == 1 ) )	/* ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãŒï¼“ç•ª */
 					{
-						enemy[0 + ( i * 20 )] = 0;		/* Á‹ */
+						enemy[0 + ( i * 20 )] = 0;		/* æ¶ˆå» */
 					}
 					
 					size2 = 32;
-					/* ƒvƒŒƒCƒ„[‚Ì’e‚Æ‚Ì“–‚½‚è”»’è */
-					/* ƒvƒŒƒCƒ„[‚Ì’e‚Æ‚Ì“–‚½‚è”»’è */
+					/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å¼¾ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
+					/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å¼¾ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
 					if ( ( ( ( enemy[1 + i * 20] + size_hosei_x ) < ( ( pmshot[5 + k * 20] >> 16 )  + size2 ) )
 						&& ( ( ( pmshot[5 + k * 20] >> 16 ) ) < ( enemy[1 + i * 20] + size - size_hosei_x  ) )
 						&& ( ( enemy[2 + i * 20] + size_hosei_y ) < ( ( pmshot[6 + k * 20] >> 16 ) + size2 ) )
 						&& ( ( ( pmshot[6 + k * 20] >> 16 ) ) < ( enemy[2 + i * 20] + size - size_hosei_y  ) ) ) 
 						&& ( pmshot[2 + k * 20] == 1 ) )
 					{
-						/* –³“GŠÔ‚ª‘¶İ‚µ‚È‚¢ */
+						/* ç„¡æ•µæ™‚é–“ãŒå­˜åœ¨ã—ãªã„ */
 						if ( enemy[16 + ( i * 20 )] == 0 )
 						{
-							/* UŒ‚‚ªŒø‚©‚È‚¢ */
+							/* æ”»æ’ƒãŒåŠ¹ã‹ãªã„ */
 							if ( ( enemy[11 + ( i * 20 )] == 402 ) && ( pmshot[7 + k * 20] != 2 ) )
 							{
-								pmshot[2 + k * 20] = 0;		/* ’eÁ‹ */
+								pmshot[2 + k * 20] = 0;		/* å¼¾æ¶ˆå» */
 								p_shot_f_set( ( pmshot[5 + k * 20] >> 16 ) , ( pmshot[6 + k * 20] >> 16 ), 0 );
 								p_shot_f2_set( ( pmshot[5 + k * 20] >> 16 ) + 15, ( pmshot[6 + k * 20] >> 16 ) + 15, 0 );
 							}
@@ -4699,8 +4605,8 @@ void enm_disp()
 								
 								p_shot_f2_set( ( pmshot[5 + k * 20] >> 16 ) + 15, ( pmshot[6 + k * 20] >> 16 ) + 15, 0 );
 								
-								if ( ( pmshot[3 + k * 20] == 2 )	/* ƒXƒLƒ‹ƒNƒ‰ƒbƒVƒ…ƒVƒ‡ƒbƒg */
-								  || ( pmshot[3 + k * 20] == 4 ) )	/* ƒXƒLƒ‹ƒNƒ‰ƒbƒVƒ…ƒVƒ‡ƒbƒg */
+								if ( ( pmshot[3 + k * 20] == 2 )	/* ã‚¹ã‚­ãƒ«ã‚¯ãƒ©ãƒƒã‚·ãƒ¥ã‚·ãƒ§ãƒƒãƒˆ */
+								  || ( pmshot[3 + k * 20] == 4 ) )	/* ã‚¹ã‚­ãƒ«ã‚¯ãƒ©ãƒƒã‚·ãƒ¥ã‚·ãƒ§ãƒƒãƒˆ */
 								{
 									p_shot_f_set( ( pmshot[5 + k * 20] >> 16 ) + ( rand( ) % 32 ) - 16, ( pmshot[6 + k * 20] >> 16 ) + ( rand( ) % 32 ) - 16, 0 );
 									p_shot_f_set( ( pmshot[5 + k * 20] >> 16 ) + ( rand( ) % 32 ) - 16, ( pmshot[6 + k * 20] >> 16 ) + ( rand( ) % 32 ) - 16, 0 );
@@ -4713,37 +4619,37 @@ void enm_disp()
 									enemy[5 + ( i * 20 )] = enemy[5 + ( i * 20 )] - 1;
 								}
 
-								pmshot[2 + k * 20] = 0;		/* ’eÁ‹ */
-								if ( enemy[5 + ( i * 20 )] <= 0 )	/* “|‚µ‚½ */
+								pmshot[2 + k * 20] = 0;		/* å¼¾æ¶ˆå» */
+								if ( enemy[5 + ( i * 20 )] <= 0 )	/* å€’ã—ãŸ */
 								{
 
-									if ( enemy[3 + ( i * 20 )] >= 4 )	/* 4ƒ{ƒX */
+									if ( enemy[3 + ( i * 20 )] >= 4 )	/* 4ãƒœã‚¹ */
 									{
 										boss_dead( enemy[1 + ( i * 20 )], enemy[2 + ( i * 20 )] );
 										event_set_enm( enemy[11 + ( i * 20 )] , i );
 										for ( l = 0; l < 20; l++ )
 										{
 											enemy[5 + ( l * 20 )] = 0;
-											enemy[6 + ( l * 20 )] = 60;		/* Á‹ */
+											enemy[6 + ( l * 20 )] = 60;		/* æ¶ˆå» */
 											enemy[16 + ( l * 20 )] = 60;
 										}
 									}
 									
-									enemy[6 + ( i * 20 )] = 60;		/* Á‹ */
+									enemy[6 + ( i * 20 )] = 60;		/* æ¶ˆå» */
 									enemy[16 + ( i * 20 )] = 60;
 
 								}
 								else 
 								{
-									/* “|‚µ‚Ä‚È‚¢ */
-									/* –³“GŠÔİ’è */
-									enemy[6 + ( i * 20 )] = 30;		/* ‚Ì‚¯‚¼‚èŠÔ */
-	//								enemy[7 + ( i * 20 )] = 6;		/* ˆÊ’u•â³ */
-									enemy[16 + ( i * 20 )] = 60;	/* –³“GŠÔ */
-									if ( enemy[3 + ( i * 20 )] >= 4 )	/* ƒ{ƒX‚Ì‚Æ‚«‚Í‚Ì‚¯‚¼‚è‚ª‚È‚¢ */
+									/* å€’ã—ã¦ãªã„ */
+									/* ç„¡æ•µæ™‚é–“è¨­å®š */
+									enemy[6 + ( i * 20 )] = 30;		/* ã®ã‘ãã‚Šæ™‚é–“ */
+	//								enemy[7 + ( i * 20 )] = 6;		/* ä½ç½®è£œæ­£ */
+									enemy[16 + ( i * 20 )] = 60;	/* ç„¡æ•µæ™‚é–“ */
+									if ( enemy[3 + ( i * 20 )] >= 4 )	/* ãƒœã‚¹ã®ã¨ãã¯ã®ã‘ãã‚ŠãŒãªã„ */
 									{
-										enemy[6 + ( i * 20 )] = 0;		/* ‚Ì‚¯‚¼‚èŠÔ */
-	//									enemy[7 + ( i * 20 )] = 0;		/* ˆÊ’u•â³ */
+										enemy[6 + ( i * 20 )] = 0;		/* ã®ã‘ãã‚Šæ™‚é–“ */
+	//									enemy[7 + ( i * 20 )] = 0;		/* ä½ç½®è£œæ­£ */
 									}
 								}
 							}
@@ -4754,7 +4660,7 @@ void enm_disp()
 #endif
 			if ( enemy[7 + ( i * 20 )] > 0 )
 			{
-				enemy[7 + ( i * 20 )]--;					/* ˆÚ“®•â³ */
+				enemy[7 + ( i * 20 )]--;					/* ç§»å‹•è£œæ­£ */
 				if ( enemy[9 + ( i * 20 )] == 0 )
 				{
 					if ( ( ( map1_item_j( enemy[1 + ( i * 20 )] - 4 , enemy[2 + ( i * 20 )] + 2 ) >= 100 )
@@ -4785,7 +4691,7 @@ void enm_disp()
 			
 			if ( enemy[6 + ( i * 20 )] > 0 )
 			{
-				enemy[6 + ( i * 20 )]--;					/* Á‚¦‚é‚Ü‚ÅƒJƒEƒ“ƒ^ */
+				enemy[6 + ( i * 20 )]--;					/* æ¶ˆãˆã‚‹ã¾ã§ã‚«ã‚¦ãƒ³ã‚¿ */
 				if ( enemy[6 + ( i * 20 )] == 0 )
 				{
 					if ( enemy[5 + ( i * 20 )] <= 0 )
@@ -4795,12 +4701,12 @@ void enm_disp()
 						}
 						else 
 						{
-							if ( ( rand( ) % 2 ) == 0 )	/* ƒ‰ƒCƒtoŒ» */
+							if ( ( rand( ) % 2 ) == 0 )	/* ãƒ©ã‚¤ãƒ•å‡ºç¾ */
 							{
 								kane_set( enemy[1 + ( i * 20 )], enemy[2 + ( i * 20 )] );
 							}
 						}
-						enemy[0 + ( i * 20 )] = 0;		/* Á‹ */
+						enemy[0 + ( i * 20 )] = 0;		/* æ¶ˆå» */
 					}
 				}
 				
@@ -4822,17 +4728,17 @@ void e_move( Sint32 i )
 	{
 		return;
 	}
-	if ( enemy[5 + ( i * 20 )] <= 0 )	/* “|‚µ‚½ */
+	if ( enemy[5 + ( i * 20 )] <= 0 )	/* å€’ã—ãŸ */
 	{
 		return;
 	}
 	
-	enemy[8 + ( i * 20 )] = 0;		/* ƒAƒjƒ[ƒVƒ‡ƒ“ƒpƒ^[ƒ“ */
+	enemy[8 + ( i * 20 )] = 0;		/* ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‘ã‚¿ãƒ¼ãƒ³ */
 	enemy[14+ ( i * 20 )] = 0;
 
 }
 
-/* ƒ{ƒX‚ğ“|‚µ‚½‰‰o */
+/* ãƒœã‚¹ã‚’å€’ã—ãŸæ¼”å‡º */
 void boss_dead( Sint32 x, Sint32 y )
 {
 /*	
@@ -4841,7 +4747,7 @@ void boss_dead( Sint32 x, Sint32 y )
 	Sint32 yy;
 	for ( i = 0; i < 100; i++ ) 
 	{
-//		BltFromBackupPlane();		//	ƒoƒbƒNƒAƒbƒvƒvƒŒ[ƒ“‚©‚ç‚ÌBlt
+//		BltFromBackupPlane();		//	ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ—ãƒ¬ãƒ¼ãƒ³ã‹ã‚‰ã®Blt
 		if ( ( i % 10 ) == 0 )
 		{
 			xx = ( rand( ) % 96 );
@@ -4858,7 +4764,7 @@ void boss_dead( Sint32 x, Sint32 y )
 }
 
 //-----------------------------------------------------------------------------------
-/* “GƒVƒ‡ƒbƒg¶¬ */
+/* æ•µã‚·ãƒ§ãƒƒãƒˆç”Ÿæˆ */
 void e_shot_set( Sint32 type , Sint32 i , Sint32 x, Sint32 y )
 {
 	Sint32 ii;
@@ -4870,18 +4776,18 @@ void e_shot_set( Sint32 type , Sint32 i , Sint32 x, Sint32 y )
 	Sint32 my;
 	*/
 	
-	/* ”­¶ˆÊ’uX */
-	/* ”­¶ˆÊ’uY */
+	/* ç™ºç”Ÿä½ç½®X */
+	/* ç™ºç”Ÿä½ç½®Y */
 	for ( ii = 0; ii < 20; ii++ )
 	{
-		if ( mgc_e[ii * 10 + 0] == 0 )					/* ‘¶İ‚µ‚Ä‚È‚¢ */
+		if ( mgc_e[ii * 10 + 0] == 0 )					/* å­˜åœ¨ã—ã¦ãªã„ */
 		{
 
 			for ( j = 0 ; j <= 9 ;j++ )
 			{
 				mgc_e[ii * 10 + j] = 0;
 			}
-			if ( type == 1061 )							/* ƒ„ƒhƒJƒŠ */
+			if ( type == 1061 )							/* ãƒ¤ãƒ‰ã‚«ãƒª */
 			{
 				/* Same issue here. rg = funcTan2 gets unused. Therefore, mx and my also get unused. - Gameblabla*/
 				//mx = ( ( 32 / 2 ) - 5 ) + player[0] - x;
@@ -4890,51 +4796,51 @@ void e_shot_set( Sint32 type , Sint32 i , Sint32 x, Sint32 y )
 				rg = ( 90 );
 				mgc_e[ii * 10 + 1] = x << 16;		/* X */
 				mgc_e[ii * 10 + 2] = y << 16;		/* Y */
-				mgc_e[ii * 10 + 3] = 0;		/* ƒAƒjƒ[ƒVƒ‡ƒ“ƒJƒEƒ“ƒ^ */
-				mgc_e[ii * 10 + 4] = funcSin( rg ) * 4;		/* ˆÚ“®•ûŒü */
-				mgc_e[ii * 10 + 5] = funcCos( rg ) * 4;	/* ˆÚ“®•ûŒü */
-				mgc_e[ii * 10 + 6] = 6;		/* ƒ_ƒ[ƒW */
-				mgc_e[ii * 10 + 7] = 2;		/* ‘®« */
-				mgc_e[ii * 10 + 9] = type;					/* ƒ^ƒCƒvplayer[10] */
+				mgc_e[ii * 10 + 3] = 0;		/* ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚«ã‚¦ãƒ³ã‚¿ */
+				mgc_e[ii * 10 + 4] = funcSin( rg ) * 4;		/* ç§»å‹•æ–¹å‘ */
+				mgc_e[ii * 10 + 5] = funcCos( rg ) * 4;	/* ç§»å‹•æ–¹å‘ */
+				mgc_e[ii * 10 + 6] = 6;		/* ãƒ€ãƒ¡ãƒ¼ã‚¸ */
+				mgc_e[ii * 10 + 7] = 2;		/* å±æ€§ */
+				mgc_e[ii * 10 + 9] = type;					/* ã‚¿ã‚¤ãƒ—player[10] */
 			}
 
-			mgc_e[ii * 10 + 0] = 1;					/* ‘¶İ‚ ‚è */
+			mgc_e[ii * 10 + 0] = 1;					/* å­˜åœ¨ã‚ã‚Š */
 			break;
 		}
 	}
 
 }
-/* ƒVƒ‡ƒbƒgˆÚ“® */
+/* ã‚·ãƒ§ãƒƒãƒˆç§»å‹• */
 void e_shot_disp( )
 {
 	Sint32 i;
 	Sint32 p_h;
 	Sint32 size ;
 	
-	p_h = 22;	/* ƒvƒŒƒCƒ„[‚Ì“–‚½‚è”»’è */
+	p_h = 22;	/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å½“ãŸã‚Šåˆ¤å®š */
 	size = 0;
 	
-	/* ”­¶ˆÊ’uX */
-	/* ”­¶ˆÊ’uY */
+	/* ç™ºç”Ÿä½ç½®X */
+	/* ç™ºç”Ÿä½ç½®Y */
 	for ( i = 0; i < 20; i++ )
 	{
-		if ( mgc_e[i * 10 + 0] == 1 )					/* ‘¶İ‚µ‚Ä‚¢‚é */
+		if ( mgc_e[i * 10 + 0] == 1 )					/* å­˜åœ¨ã—ã¦ã„ã‚‹ */
 		{
-			if ( mgc_e[i * 10 + 9] == 4010 ) 	/* ‚Pƒ{ƒX */
+			if ( mgc_e[i * 10 + 9] == 4010 ) 	/* ï¼‘ãƒœã‚¹ */
 			{
 				size = 32;
 				BltRect( 50, ( mgc_e[i * 10 + 1] >> 16 ) - d_x , ( 0 - ( mgc_e[i * 10 + 2] >> 16 ) ) + 480 - 32 - d_y, mgc_e[i * 10 + 3] * 32, 0 , 32, 32 );
 				mgc_e[i * 10 + 1] = mgc_e[i * 10 + 1] + mgc_e[i * 10 + 4];		/* X */
 				mgc_e[i * 10 + 2] = mgc_e[i * 10 + 2] + mgc_e[i * 10 + 5];		/* Y */
-				mgc_e[i * 10 + 3]++;					/* ƒAƒjƒ[ƒVƒ‡ƒ“ƒJƒEƒ“ƒ^ */
+				mgc_e[i * 10 + 3]++;					/* ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚«ã‚¦ãƒ³ã‚¿ */
 				if ( mgc_e[i * 10 + 3] >= 4 )
 				{
 					mgc_e[i * 10 + 3] = 0;
 				}
 			}
 			
-			/* ƒvƒŒƒCƒ„[‚Æ‚Ì“–‚½‚è”»’è */
-			if ( ( ( ( ( mgc_e[1 + i * 10] >> 16 ) ) < (player[0] + 22 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+			/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
+			if ( ( ( ( ( mgc_e[1 + i * 10] >> 16 ) ) < (player[0] + 22 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 				&& ( (player[0] + 10 ) < ( ( mgc_e[1 + i * 10] >> 16 ) + size ) )
 				&& ( ( ( mgc_e[2 + i * 10] >> 16 ) ) < (player[1] + p_h) )
 				&& ( (player[1] + 5  ) < ( ( mgc_e[2 + i * 10] >> 16 ) + size ) ) ) 
@@ -4944,8 +4850,8 @@ void e_shot_disp( )
 				player[11] = 0;
 				player[12] = 4;
 				player[13] = 0;
-				player[2] = 31;	/* ƒ_ƒ[ƒW */
-				player[17] = 120;	/* –³“GŠÔ */
+				player[2] = 31;	/* ãƒ€ãƒ¡ãƒ¼ã‚¸ */
+				player[17] = 120;	/* ç„¡æ•µæ™‚é–“ */
 				player[8] = player[8] - 1;
 			}
 
@@ -4958,7 +4864,7 @@ void e_shot_disp( )
 	}
 }
 
-/* “G—pƒWƒƒƒ“ƒv */
+/* æ•µç”¨ã‚¸ãƒ£ãƒ³ãƒ— */
 void enmjmp( Sint32 i )
 {
 	Sint32 y1;
@@ -4985,13 +4891,13 @@ void enmjmp( Sint32 i )
 
 	if ( enemy[13 + ( i * 20 )] == 10 ) 
 	{
-		/* ¡‰ñ‚ÌˆÊ’u */
+		/* ä»Šå›ã®ä½ç½® */
 		// Seems to not get used here - Gameblabla
 		//px = ( enemy[1 + ( i * 20 )] + 32 ) / 32;
 		px1 = ( enemy[1 + ( i * 20 )] + size ) / 32;
 		px2 = ( enemy[1 + ( i * 20 )] + size ) / 32;
 		py = ( 16 - ( ( enemy[2 + ( i * 20 )] + 28 ) / 32 ) );
-		/* 100 ` 200‚Í’n–Ê */
+		/* 100 ã€œ 200ã¯åœ°é¢ */
 		if ( ( !( ( map1[ px1 + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 119 ) ) )
 		  && ( !( ( map1[ px2 + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px2 + ( ( py ) * 20 ) ] <= 119 ) ) ) 
 		  && ( !( ( map1[ px1 + ( ( py ) * 20 ) ] >= 200 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 219 ) ) )
@@ -5026,22 +4932,22 @@ void enmjmp( Sint32 i )
 		{
 			enemy[13 + ( i * 20 )] = -8;
 		}
-		/* ’n–Ê”»’è */
+		/* åœ°é¢åˆ¤å®š */
 	}
 
 
-	/* ‰æ–Ê’[‚Å—‚¿‚é‚Ì‚ğ–h~ */
+	/* ç”»é¢ç«¯ã§è½ã¡ã‚‹ã®ã‚’é˜²æ­¢ */
 	e10 = enemy[13 + ( i * 20 )];
 	if (  enemy[1+ ( i * 20 )] > ( 630 - size - size ) )
 	{
-		if ( enemy[13+ ( i * 20 )] < 0 )	/* —‰º */
+		if ( enemy[13+ ( i * 20 )] < 0 )	/* è½ä¸‹ */
 		{
 			e10 = 0;
 		}
 	}
 
 
-	/* ¡‰ñ‚ÌˆÊ’u */
+	/* ä»Šå›ã®ä½ç½® */
 	y1 = ( ( 0 - e10 ) * ( 0 - e10 ) * ( 0 - e10 ) );
 //	player[1] = player[1] - ( y1 / 30 );
 
@@ -5056,9 +4962,9 @@ void enmjmp( Sint32 i )
 		return;
 	}
 
-	if ( enemy[13 + ( i * 20 )] <= 0 )													/* ã‚è’†‚Í”»’è‚µ‚È‚¢ */
+	if ( enemy[13 + ( i * 20 )] <= 0 )													/* ä¸Šã‚Šä¸­ã¯åˆ¤å®šã—ãªã„ */
 	{
-		/* ’n–Ê”»’è */
+		/* åœ°é¢åˆ¤å®š */
 		if ( ( ( map1[ px1 + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 119 ) )
 		  || ( ( map1[ px1 + ( ( py ) * 20 ) ] >= 200 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 219 ) ) 
 		  || ( ( map1[ px1 + ( ( py ) * 20 ) ] >= 600 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 619 ) )
@@ -5068,14 +4974,14 @@ void enmjmp( Sint32 i )
 			enemy[13 + ( i * 20 )] = 10;
 		}
 	}
-	else		/* ã¸’† */
+	else		/* ä¸Šæ˜‡ä¸­ */
 	{
 		if ( enemy[1+ ( i * 20 )] < ( 630 - size - size ) )
 		{
 			px = ( enemy[1 + ( i * 20 )] + size ) / 32;
 			py = ( 16 - ( ( enemy[2 + ( i * 20 )] - ( y1 / 25 ) + 16 + 48  ) / 32 ) );
 
-			/* ’n–Ê”»’è */
+			/* åœ°é¢åˆ¤å®š */
 			if ( ( ( map1[ px + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px + ( ( py ) * 20 ) ] <= 119 ) )
 			  || ( ( map1[ px + ( ( py ) * 20 ) ] >= 200 ) && ( map1[ px + ( ( py ) * 20 ) ] <= 219 ) ) )
 			{
@@ -5093,7 +4999,7 @@ void enmjmp( Sint32 i )
 }
 
 
-/* ˆÚ“®Œã‚ÌÀ•W‚Ìƒ}ƒX‚ğ•Ô‚· */
+/* ç§»å‹•å¾Œã®åº§æ¨™ã®ãƒã‚¹ã‚’è¿”ã™ */
 Sint32 map1_item_j( Sint32 x, Sint32 y )
 {
 	Sint32 px ;
@@ -5111,18 +5017,18 @@ Sint32 map1_item_j( Sint32 x, Sint32 y )
 	
 	rc = map1[ px + ( ( py ) * 20 ) ];
 	
-	/* ƒAƒCƒeƒ€‚Æ‚Ì‚ ‚½‚è”»’è */
+	/* ã‚¢ã‚¤ãƒ†ãƒ ã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 	for ( i = 0; i < 50; i++ )
 	{
 		if ( item[( i * 10 ) + 0 ] == 1 )
 		{
-			/* ƒvƒŒƒCƒ„[‚Æ‚Ì“–‚½‚è”»’è */
-			if ( ( ( (item[1 + ( i * 10 )]  ) < ( x ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+			/* ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®å½“ãŸã‚Šåˆ¤å®š */
+			if ( ( ( (item[1 + ( i * 10 )]  ) < ( x ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 				&& ( ( x ) < (item[1 + ( i * 10 )] + 31 ) )
 				&& ( (item[2 + ( i * 10 )] ) < ( y ) )
 				&& ( ( y ) < ( item[2 + ( i * 10 )] + 32 ) ) ) )
 			{
-				if ( ( item[( i * 10 ) + 3 ] >= 500 ) && ( item[( i * 10 ) + 3 ] <= 620 ) ) /* ˆÚ“®•s‰ÂƒAƒCƒeƒ€ */
+				if ( ( item[( i * 10 ) + 3 ] >= 500 ) && ( item[( i * 10 ) + 3 ] <= 620 ) ) /* ç§»å‹•ä¸å¯ã‚¢ã‚¤ãƒ†ãƒ  */
 				{
 					rc = 101;
 					break;
@@ -5199,8 +5105,8 @@ void kane_disp(  )
 			} 
 
 			k_jmp( i );
-			/* ‚Æ‚Á‚½ */
-			if ( ( ( (kane[1 + ( i * 10 )]  ) < (player[0] + 10 ) )	/* ©‹@‚Æ‚Ì‚ ‚½‚è”»’è */
+			/* ã¨ã£ãŸ */
+			if ( ( ( (kane[1 + ( i * 10 )]  ) < (player[0] + 10 ) )	/* è‡ªæ©Ÿã¨ã®ã‚ãŸã‚Šåˆ¤å®š */
 				&& ( (player[0] + 22 ) < (kane[1 + ( i * 10 )] + 32 ) )
 				&& ( (kane[2 + ( i * 10 )] ) < (player[1] + 32 ) )
 				&& ( (player[1] + 5 ) < ( kane[2 + ( i * 10 )] + 32 ) ) ) )
@@ -5215,7 +5121,7 @@ void kane_disp(  )
 		}
 	}
 }
-/* ƒWƒƒƒ“ƒv‚xˆÊ’uŒvZ */
+/* ã‚¸ãƒ£ãƒ³ãƒ—ï¼¹ä½ç½®è¨ˆç®— */
 void k_jmp( Sint32 i )
 {
 	Sint32 y1;
@@ -5240,15 +5146,15 @@ void k_jmp( Sint32 i )
 		{
 			kane[6 + ( i * 10 )] = -8;
 		}
-		/* ’n–Ê”»’è */
+		/* åœ°é¢åˆ¤å®š */
 	}
 	
-	/* ‰æ–Ê’[‚Å—‚¿‚é‚Ì‚ğ–h~ */
+	/* ç”»é¢ç«¯ã§è½ã¡ã‚‹ã®ã‚’é˜²æ­¢ */
 	if ( ( kane[1 + ( i * 10 )] < 0 ) || ( kane[1 + ( i * 10 )] > 610 ) )
 	{
 		kane[6 + ( i * 10 )] = 0;
 	}
-	/* ¡‰ñ‚ÌˆÊ’u */
+	/* ä»Šå›ã®ä½ç½® */
 	y1 = ( ( 0 - kane[6 + ( i * 10 )] ) * ( 0 - kane[6 + ( i * 10 )] ) * ( 0 - kane[6 + ( i * 10 )] ) );
 
 	px1 = ( kane[1 + ( i * 10 )] + 16 ) / 32;
@@ -5262,9 +5168,9 @@ void k_jmp( Sint32 i )
 		return;
 	}
 
-	if ( kane[6 + ( i * 10 )] <= 0 ) 													/* ã‚è’†‚Í”»’è‚µ‚È‚¢ */
+	if ( kane[6 + ( i * 10 )] <= 0 ) 													/* ä¸Šã‚Šä¸­ã¯åˆ¤å®šã—ãªã„ */
 	{
-		/* ’n–Ê”»’è */
+		/* åœ°é¢åˆ¤å®š */
 		if ( ( ( map1[ px1 + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 299 ) )
 		  || ( ( map1[ px2 + ( ( py ) * 20 ) ] >= 100 ) && ( map1[ px2 + ( ( py ) * 20 ) ] <= 299 ) ) 
 		  || ( ( map1[ px1 + ( ( py ) * 20 ) ] >= 600 ) && ( map1[ px1 + ( ( py ) * 20 ) ] <= 619 ) )
@@ -5274,9 +5180,9 @@ void k_jmp( Sint32 i )
 			kane[6 + ( i * 10 )] = 10;
 		}
 	}
-	else		/* ã¸’† */
+	else		/* ä¸Šæ˜‡ä¸­ */
 	{
-		/* ’n–Ê”»’è */
+		/* åœ°é¢åˆ¤å®š */
 		if ( ( ( map1[ px1 + ( ( py3 ) * 20 ) ] >= 100 ) && ( map1[ px1 + ( ( py3 ) * 20 ) ] <= 119 ) )
 		  || ( ( map1[ px1 + ( ( py3 ) * 20 ) ] >= 200 ) && ( map1[ px1 + ( ( py3 ) * 20 ) ] <= 219 ) )
 		  || ( ( map1[ px2 + ( ( py3 ) * 20 ) ] >= 100 ) && ( map1[ px2 + ( ( py3 ) * 20 ) ] <= 119 ) )
@@ -5340,14 +5246,14 @@ void screen_BackupPlane( )
 {
 }
 
-/* ƒƒjƒ…[‚Ì•\¦ */
+/* ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¡¨ç¤º */
 void window_disp( )
 {
 	BltRect( 61, 96, 64 + ( 32 * demo[0] ), 0, gameflag[122] * 32 , 32, 32 );
 	Blt( 60, 0, 0 );
 }
 
-/* ƒƒjƒ…[‚Å‚ÌƒL[‘€ì */
+/* ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã§ã®ã‚­ãƒ¼æ“ä½œ */
 void window_keys( )
 {
 	if ( IsPushKey( gameflag[0] ) )
@@ -5368,7 +5274,7 @@ void window_keys( )
 			demo[0] = 0;
 		}
 	}
-	//	ƒXƒy[ƒXƒL[‚ª‰Ÿ‚³‚ê‚é
+	//	ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ãŒæŠ¼ã•ã‚Œã‚‹
 	if ( IsPushOKKey( ) ) 
 	{
 		if ( demo[0] == 0 )
@@ -5382,12 +5288,12 @@ void window_keys( )
 		}
 		if ( demo[0] == 2 )
 		{
-			g_scene = EN_SN_TITLE;	/* ƒ^ƒCƒgƒ‹‚Ö */
+			g_scene = EN_SN_TITLE;	/* ã‚¿ã‚¤ãƒˆãƒ«ã¸ */
 //			gameflag[40] = 1;
 			sn = 10;
 		}
 	}
-	//B‚ª‰Ÿ‚³‚ê‚é
+	//BãŒæŠ¼ã•ã‚Œã‚‹
 	if ( IsPushCancelKey( ) )
 	{
 		sn = 1;
@@ -5397,7 +5303,7 @@ void window_keys( )
 
 
 
-/* â‘Î’l‚ğ•Ô‚· */
+/* çµ¶å¯¾å€¤ã‚’è¿”ã™ */
 Sint32 labs_gnp( Sint32 para )
 {
 	Sint32 rc;
@@ -5411,7 +5317,7 @@ Sint32 labs_gnp( Sint32 para )
 	return( rc );
 }
 
-/* –‚–@¶¬ */
+/* é­”æ³•ç”Ÿæˆ */
 void p_mgc_set( Sint32 muki , Sint32 p3 )
 {
 	Sint32 i;
@@ -5448,8 +5354,8 @@ void p_mgc_set( Sint32 muki , Sint32 p3 )
 		rg = rg * -1;
 	}
  
-	/* ”­¶ˆÊ’uX */
-	/* ”­¶ˆÊ’uY */
+	/* ç™ºç”Ÿä½ç½®X */
+	/* ç™ºç”Ÿä½ç½®Y */
 
 	max = 1;
 	for ( i = 0; i < max; i++ )
@@ -5461,14 +5367,14 @@ void p_mgc_set( Sint32 muki , Sint32 p3 )
 		{
 			if ( pmshot[ii * 20 + 2] == 0 )
 			{
-				pmshot[ii * 20 + 0] = funcSin( rg ) * k;			/* ’e‘¬x */
-				pmshot[ii * 20 + 1] = funcCos( rg ) * k;			/* ’e‘¬y */
-				pmshot[ii * 20 + 2] = 1;						/* ‘¶İ */
-				pmshot[ii * 20 + 3] = 0;						/* í—Ş */
+				pmshot[ii * 20 + 0] = funcSin( rg ) * k;			/* å¼¾é€Ÿx */
+				pmshot[ii * 20 + 1] = funcCos( rg ) * k;			/* å¼¾é€Ÿy */
+				pmshot[ii * 20 + 2] = 1;						/* å­˜åœ¨ */
+				pmshot[ii * 20 + 3] = 0;						/* ç¨®é¡ */
 				pmshot[ii * 20 + 4] = 0 ;						/*  */
-				pmshot[ii * 20 + 5] = ( player[0] ) << 16 ;			/* ‰ŠúˆÊ’u‚Ìİ’è */
+				pmshot[ii * 20 + 5] = ( player[0] ) << 16 ;			/* åˆæœŸä½ç½®ã®è¨­å®š */
 				pmshot[ii * 20 + 6] = ( player[1] ) << 16 ;
-				pmshot[ii * 20 + 7] = muki;						/* •ûŒü */
+				pmshot[ii * 20 + 7] = muki;						/* æ–¹å‘ */
 				
 				pmshot[ii * 20 + 8] = 0;						/*  */
 				pmshot[ii * 20 + 9] = 0 ;						/*  */
@@ -5491,24 +5397,24 @@ void p_mgc_disp( )
 		{
 			BltRect( 4, ( pmshot[ii * 20 + 5] >> 16 ) - d_x, 480 - ( pmshot[ii * 20 + 6] >> 16 ) - 32 - d_y, 0, 96, 32, 32 );
 
-			pmshot[ii * 20 + 5] = pmshot[ii * 20 + 0] + pmshot[ii * 20 + 5];		/* ’e‘¬x */
-			pmshot[ii * 20 + 6] = pmshot[ii * 20 + 1] + pmshot[ii * 20 + 6];		/* ’e‘¬x */
+			pmshot[ii * 20 + 5] = pmshot[ii * 20 + 0] + pmshot[ii * 20 + 5];		/* å¼¾é€Ÿx */
+			pmshot[ii * 20 + 6] = pmshot[ii * 20 + 1] + pmshot[ii * 20 + 6];		/* å¼¾é€Ÿx */
 			
 			if ( ( ( pmshot[ii * 20 + 5] >> 16 ) > 640 ) || ( ( pmshot[ii * 20 + 5] >> 16 ) < -32 ) )
 			{
-				pmshot[ii * 20 + 2] = 0;				/* ‘¶İ–³‚µ */
+				pmshot[ii * 20 + 2] = 0;				/* å­˜åœ¨ç„¡ã— */
 			}
 			if ( ( ( pmshot[ii * 20 + 6] >> 16 ) > 480 ) || ( ( pmshot[ii * 20 + 6] >> 16 ) < -32 ) )
 			{
-				pmshot[ii * 20 + 2] = 0;				/* ‘¶İ–³‚µ */
+				pmshot[ii * 20 + 2] = 0;				/* å­˜åœ¨ç„¡ã— */
 			}
 			
 			if ( ( ( map1_item_j( ( pmshot[ii * 20 + 5] >> 16 ) + 16 , ( pmshot[ii * 20 + 6] >> 16 ) + 16 ) >= 100 )
 			    && ( map1_item_j( ( pmshot[ii * 20 + 5] >> 16 ) + 16 , ( pmshot[ii * 20 + 6] >> 16 ) + 16 ) <= 220 ) ) )
 			{
-				pmshot[ii * 20 + 2] = 0;				/* ‘¶İ–³‚µ */
+				pmshot[ii * 20 + 2] = 0;				/* å­˜åœ¨ç„¡ã— */
 				p_shot_f2_set( ( pmshot[5 + ii * 20] >> 16 ) + 15, ( pmshot[6 + ii * 20] >> 16 ) + 15, 0 );
-				if ( pmshot[3 + ii * 20] == 2 )	/* ƒXƒLƒ‹ƒNƒ‰ƒbƒVƒ…ƒVƒ‡ƒbƒg */
+				if ( pmshot[3 + ii * 20] == 2 )	/* ã‚¹ã‚­ãƒ«ã‚¯ãƒ©ãƒƒã‚·ãƒ¥ã‚·ãƒ§ãƒƒãƒˆ */
 				{
 					p_shot_f_set( ( pmshot[5 + ii * 20] >> 16 ) + ( rand( ) % 32 ) - 16, ( pmshot[6 + ii * 20] >> 16 ) + ( rand( ) % 32 ) - 16, 0 );
 					p_shot_f_set( ( pmshot[5 + ii * 20] >> 16 ) + ( rand( ) % 32 ) - 16, ( pmshot[6 + ii * 20] >> 16 ) + ( rand( ) % 32 ) - 16, 0 );
@@ -5531,7 +5437,7 @@ void replay_input_save( void )
 	Sint32 input_keys;
 	input_keys = 0;
 	
-	/* ƒL[ˆ—‚ÍŠî–{“I‚Éplayer[2]‚ª‰½ó‘Ô‚Ì‚ÉƒL[‚ğ“ü‚ê‚½‚ç‚Ç‚¤‚È‚é‚ğ‹Lq‚µ‚Ä‚¢‚­ */
+	/* ã‚­ãƒ¼å‡¦ç†ã¯åŸºæœ¬çš„ã«player[2]ãŒä½•çŠ¶æ…‹ã®æ™‚ã«ã‚­ãƒ¼ã‚’å…¥ã‚ŒãŸã‚‰ã©ã†ãªã‚‹ã‚’è¨˜è¿°ã—ã¦ã„ã */
 	if ( IsPressKey( gameflag[2] ) )
 	{
 		input_keys = input_keys + 1;
@@ -5550,24 +5456,24 @@ void replay_input_save( void )
 		input_keys = input_keys + 1000;
 	}
 	
-	//	ƒXƒy[ƒXƒL[‚ª‰Ÿ‚³‚ê‚é
+	//	ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ãŒæŠ¼ã•ã‚Œã‚‹
 	if ( IsPressKey( gameflag[4] ) )
 	{
 		input_keys = input_keys + 10000;
 	}
 	
-	//B‚ª‰Ÿ‚³‚ê‚é
+	//BãŒæŠ¼ã•ã‚Œã‚‹
 	if ( IsPressKey( gameflag[5] ) )
 	{
 		input_keys = input_keys + 100000;
 	}
 	
-	//B‚ª‰Ÿ‚³‚ê‚é
+	//BãŒæŠ¼ã•ã‚Œã‚‹
 	if ( IsPushKey( gameflag[5] ) )
 	{
 		input_keys = input_keys + 1000000;
 	}
-	/* 12ƒ{ƒ^ƒ“@‚©@‚b‚ª‰Ÿ‚³‚ê‚½ */
+	/* 12ãƒœã‚¿ãƒ³ã€€ã‹ã€€ï¼£ãŒæŠ¼ã•ã‚ŒãŸ */
 //	if ( ( ( IsPushJoyKey(6) != 0 ) || ( IsPushJoyKey(12) != 0 ) || IsPushKey( gameflag[6] ) ) )
 //	{
 //		input_keys = input_keys + 10000000;
@@ -5709,10 +5615,3 @@ void debugdisp( void )
 	BltNumericImage( ( MOTatan(player[30] * 256,player[31] * 256) ), 8, 10, 70, 18, 0, 0, 10, 8 );	
 #endif
 }
-
-
-
-
-
-
-

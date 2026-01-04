@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.18...4.0)
 
 project(Ganbare_Natsuki_San)
 
@@ -16,15 +16,12 @@ add_executable(gannatsu
 	src/function.c
 	src/function.h
 	src/general.h
-	src/init.c
+	src/main.c
 	src/logo.c
 	src/logo.h
 	src/option.c
 	src/option.h
 	src/paths.h
-	src/ram.c
-	src/refresh.c
-	src/refresh.h
 	src/scene.c
 	src/scene.h
 	src/title.c
@@ -32,8 +29,8 @@ add_executable(gannatsu
 	src/util_snd.c
 	src/util_snd.h)
 
-find_package(SDL REQUIRED)
-find_package(SDL_mixer REQUIRED)
+target_compile_options(gannatsu PRIVATE -Wall -Wunused)
 
-target_include_directories(gannatsu PRIVATE ${SDL_INCLUDE_DIRS} ${SDL_MIXER_INCLUDE_DIRS})
-target_link_libraries(gannatsu PRIVATE ${SDL_LIBRARIES} ${SDL_MIXER_LIBRARIES})
+find_package(SDL2 REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+target_link_libraries(gannatsu PRIVATE SDL2::SDL2 SDL2_mixer::SDL2_mixer)

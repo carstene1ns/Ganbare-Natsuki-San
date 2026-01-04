@@ -1,6 +1,6 @@
-#ifndef __OPTION
-#define __OPTION
+#ifndef OPTION_H
+#define OPTION_H
 
-extern void option_main( void );
+extern void option_main();
 
-#endif
+#endif // OPTION_H

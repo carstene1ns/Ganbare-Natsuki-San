@@ -1,6 +1,6 @@
-#ifndef __LOGO
-#define __LOGO
+#ifndef LOGO_H
+#define LOGO_H
 
-extern void logo_main( void );
+extern void logo_main();
 
-#endif
+#endif // LOGO_H
